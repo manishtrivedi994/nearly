@@ -34,6 +34,15 @@ const cities: CityConfig[] = [
       { type: 'rss', url: 'TBD', name: 'Times of India' },
     ],
   },
+  {
+    slug: 'hyderabad',
+    display_name: 'Hyderabad',
+    sources: [
+      { type: 'newsapi', query: 'Hyderabad city news', language: 'en' },
+      { type: 'rss', url: 'TBD', name: 'Deccan Chronicle' },
+      { type: 'rss', url: 'TBD', name: 'Hans India' },
+    ],
+  },
 ];
 
 export default cities;
