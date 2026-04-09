@@ -346,7 +346,7 @@ export function Digest() {
               onBookmark={toggle}
               onClick={() =>
                 navigate(`/digest/${citySlug}/item/${i}`, {
-                  state: { item, items: digest?.items ?? [] },
+                  state: { item, items: digest?.items ?? [], date: digest?.date },
                 })
               }
             />

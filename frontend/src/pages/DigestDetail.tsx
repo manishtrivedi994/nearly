@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/Badge';
 interface LocationState {
   item: DigestItem;
   items: DigestItem[];
+  date?: string;
 }
 
 function isLocationState(v: unknown): v is LocationState {
@@ -15,6 +16,30 @@ function isLocationState(v: unknown): v is LocationState {
     v !== null &&
     'item' in v &&
     'items' in v
+  );
+}
+
+function scoreColor(score: number): string {
+  if (score >= 0.8) return '#1D9E75';
+  if (score >= 0.5) return '#EF9F27';
+  return '#B4B2A9';
+}
+
+function Chip({ label }: { label: string }) {
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        color: 'var(--color-text-muted)',
+        background: 'var(--color-bg-secondary)',
+        border: '1px solid var(--color-border)',
+        padding: '2px 8px',
+        borderRadius: 'var(--radius-pill)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -30,7 +55,7 @@ export function DigestDetail() {
 
   if (!isLocationState(location.state)) return null;
 
-  const { item, items } = location.state;
+  const { item, items, date } = location.state;
 
   const related = items
     .filter((i) => i !== item && i.category === item.category)
@@ -68,16 +93,47 @@ export function DigestDetail() {
 
       {/* Body */}
       <div style={{ padding: 16 }}>
+
+        {/* Summary — full text, larger than card */}
         <p
           style={{
-            fontSize: 13,
-            lineHeight: 1.65,
+            fontSize: 14,
+            lineHeight: 1.7,
             color: 'var(--color-text-primary)',
             margin: 0,
           }}
         >
           {item.summary}
         </p>
+
+        {/* Metadata row */}
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 6,
+            alignItems: 'center',
+            marginTop: 14,
+          }}
+        >
+          <Chip label={item.city_slug.charAt(0).toUpperCase() + item.city_slug.slice(1)} />
+          {item.area && item.area !== 'null' && <Chip label={item.area} />}
+          {date && <Chip label={date} />}
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: scoreColor(item.relevance_score),
+              background: 'var(--color-bg-secondary)',
+              border: `1px solid ${scoreColor(item.relevance_score)}`,
+              padding: '2px 8px',
+              borderRadius: 'var(--radius-pill)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            AI confidence: {Math.round(item.relevance_score * 100)}%
+          </span>
+        </div>
 
         <div style={{ height: 1, background: 'var(--color-border)', margin: '14px 0' }} />
 
