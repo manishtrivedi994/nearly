@@ -72,8 +72,16 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
       return;
     }
 
-    // Step 6: Summarize via Groq
+    // Step 6: Summarize via Groq — skip if digest already exists for today
     step = 'summarize';
+    const date = todayIST();
+    const existing = db
+      .prepare('SELECT 1 FROM digests WHERE city_slug = ? AND digest_date = ?')
+      .get(city.slug, date);
+    if (existing) {
+      console.log(`[INFO] ${city.slug} — digest already exists for ${date}, skipping Groq call`);
+      return;
+    }
     const digestItems = await summarizeForCity(recentItems, city);
 
     if (digestItems.length === 0) {
@@ -83,7 +91,6 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
 
     // Step 7: Upsert into digests (INSERT OR REPLACE on city_slug + digest_date)
     step = 'upsert';
-    const date = todayIST();
     db.prepare(
       `INSERT OR REPLACE INTO digests (city_slug, digest_date, items_json)
        VALUES (?, ?, ?)`,

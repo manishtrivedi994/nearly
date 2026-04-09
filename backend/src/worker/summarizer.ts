@@ -117,7 +117,18 @@ export async function summarizeForCity(
     try {
       items = await callGroq(city, batch, date);
     } catch (err) {
-      console.error(`[ERROR] summarizeForCity ${city.slug} first attempt:`, (err as Error).message);
+      const message = (err as Error).message;
+      console.error(`[ERROR] summarizeForCity ${city.slug} first attempt:`, message);
+
+      // If it's a 429 rate-limit, check the actual retry-after window.
+      // Retrying after 60s is pointless when the model quota resets in hours.
+      if (message.includes('rate_limit_exceeded')) {
+        const match = message.match(/Please try again in ([^.]+)\./);
+        if (match) {
+          console.error(`[ERROR] summarizeForCity ${city.slug}: rate limit — retry in ${match[1]}, skipping`);
+          return [];
+        }
+      }
 
       await new Promise<void>((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
 
