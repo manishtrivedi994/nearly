@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDigest } from '../hooks/useDigest';
 import { useBookmarks } from '../hooks/useBookmarks';
+import { useStreak } from '../hooks/useStreak';
 import { getCities } from '../lib/api';
 import { DigestCard } from '../components/DigestCard';
 import { Navbar } from '../components/ui/Navbar';
@@ -62,6 +63,7 @@ export function Digest() {
   const [cities, setCities] = useState<City[]>([]);
   const navigate = useNavigate();
   const { isBookmarked, toggle } = useBookmarks();
+  const streak = useStreak();
 
   useEffect(() => {
     getCities().then(setCities).catch(() => {});
@@ -96,6 +98,7 @@ export function Digest() {
         onCitySelect={(slug) => navigate(`/digest/${slug}`)}
         onLogoClick={() => navigate('/')}
         archiveHref={`/digest/${citySlug}/archive`}
+        streak={streak}
       />
 
       {/* Hero band */}

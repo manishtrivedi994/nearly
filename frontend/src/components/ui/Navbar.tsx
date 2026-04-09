@@ -12,6 +12,7 @@ interface NavbarProps {
   cities?: City[];
   onCitySelect?: (slug: string) => void;
   archiveHref?: string;
+  streak?: number;
 }
 
 export function Navbar({
@@ -23,6 +24,7 @@ export function Navbar({
   cities,
   onCitySelect,
   archiveHref,
+  streak = 0,
 }: NavbarProps) {
   return (
     <nav
@@ -68,9 +70,25 @@ export function Navbar({
         )}
       </div>
 
-      {/* Right: bookmarks + archive link + city dropdown */}
+      {/* Right: streak + bookmarks + archive link + city dropdown */}
       {!showBack && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {streak >= 2 && (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: '#B85000',
+                background: '#FFF0E0',
+                padding: '3px 8px',
+                borderRadius: 'var(--radius-pill)',
+                letterSpacing: '0.3px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              🔥 {streak} days
+            </span>
+          )}
           <Link
             to="/bookmarks"
             style={{
