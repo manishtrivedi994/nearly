@@ -61,6 +61,15 @@ const cities: CityConfig[] = [
       { type: 'rss', url: 'TBD', name: 'Udayavani' },
     ],
   },
+  {
+    slug: 'hubli-dharwad',
+    display_name: 'Hubli-Dharwad',
+    sources: [
+      { type: 'newsapi', query: 'Hubli-Dharwad city news', language: 'en' },
+      { type: 'rss', url: 'TBD', name: 'Prajavani RSS' },
+      { type: 'rss', url: 'TBD', name: 'Samyukta Karnataka' },
+    ],
+  },
 ];
 
 export default cities;
