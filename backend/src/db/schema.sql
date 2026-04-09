@@ -1,0 +1,34 @@
+-- Raw content fetched from sources, before AI processing
+CREATE TABLE IF NOT EXISTS raw_items (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  city_slug    TEXT    NOT NULL,
+  source_type  TEXT    NOT NULL CHECK(source_type IN ('newsapi','rss','twitter')),
+  source_name  TEXT    NOT NULL,
+  title        TEXT    NOT NULL,
+  url          TEXT,
+  raw_text     TEXT,
+  content_hash TEXT    NOT NULL UNIQUE,  -- SHA256 of (title + source_name), dedup key
+  fetched_at   TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+-- AI-generated daily digests, one row per city per day
+CREATE TABLE IF NOT EXISTS digests (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  city_slug    TEXT    NOT NULL,
+  digest_date  TEXT    NOT NULL,          -- YYYY-MM-DD (IST)
+  items_json   TEXT    NOT NULL,          -- JSON array of DigestItem
+  generated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(city_slug, digest_date)
+);
+
+-- City configuration (source of truth for which cities are active)
+CREATE TABLE IF NOT EXISTS cities (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug         TEXT    NOT NULL UNIQUE,  -- e.g. "bangalore", "delhi"
+  display_name TEXT    NOT NULL,         -- e.g. "Bangalore"
+  is_active    INTEGER NOT NULL DEFAULT 1,
+  sources_json TEXT    NOT NULL          -- JSON array of SourceConfig
+);
+
+CREATE INDEX IF NOT EXISTS idx_raw_items_city_fetched ON raw_items(city_slug, fetched_at);
+CREATE INDEX IF NOT EXISTS idx_digests_city_date ON digests(city_slug, digest_date);
