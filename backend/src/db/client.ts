@@ -45,17 +45,21 @@ db.exec(schema);
   }
 }
 
-// Seed cities table on first run
-const cityCount = (db.prepare('SELECT COUNT(*) AS n FROM cities').get() as { n: number }).n;
-if (cityCount === 0) {
-  const insert = db.prepare(`
+// Upsert cities from config on every start — adds new cities, updates sources/tier,
+// but never overwrites is_active (so manual overrides in the DB are preserved).
+{
+  const upsert = db.prepare(`
     INSERT INTO cities (slug, display_name, is_active, tier, sources_json)
     VALUES (@slug, @display_name, @is_active, @tier, @sources_json)
+    ON CONFLICT(slug) DO UPDATE SET
+      display_name = excluded.display_name,
+      tier         = excluded.tier,
+      sources_json = excluded.sources_json
   `);
 
-  const seedAll = db.transaction(() => {
+  const upsertAll = db.transaction(() => {
     for (const city of cities) {
-      insert.run({
+      upsert.run({
         slug: city.slug,
         display_name: city.display_name,
         is_active: city.tier < 3 ? 1 : 0,
@@ -65,8 +69,8 @@ if (cityCount === 0) {
     }
   });
 
-  seedAll();
-  console.log(`[DB] Seeded ${cities.length} cities`);
+  upsertAll();
+  console.log(`[DB] Synced ${cities.length} cities from config`);
 }
 
 export default db;
