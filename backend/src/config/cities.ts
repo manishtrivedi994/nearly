@@ -43,6 +43,15 @@ const cities: CityConfig[] = [
       { type: 'rss', url: 'TBD', name: 'Hans India' },
     ],
   },
+  {
+    slug: 'mysuru',
+    display_name: 'Mysuru',
+    sources: [
+      { type: 'newsapi', query: 'Mysuru city news', language: 'en' },
+      { type: 'rss', url: 'TBD', name: 'Star of Mysore RSS' },
+      { type: 'rss', url: 'TBD', name: 'Mysuru Today' },
+    ],
+  },
 ];
 
 export default cities;
