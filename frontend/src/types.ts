@@ -29,3 +29,9 @@ export interface DigestResponse {
   generated_at: string;
   items: DigestItem[];
 }
+
+export interface SearchResultItem {
+  item: DigestItem;
+  date: string;        // YYYY-MM-DD
+  city_slug: string;
+}

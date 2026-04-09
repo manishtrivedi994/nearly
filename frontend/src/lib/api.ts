@@ -1,4 +1,4 @@
-import type { City, DigestResponse } from '../types';
+import type { City, DigestResponse, SearchResultItem } from '../types';
 
 const BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 
@@ -20,6 +20,12 @@ export function getDigest(city: string, date?: string): Promise<DigestResponse> 
     ? `/api/digest/${encodeURIComponent(city)}/${encodeURIComponent(date)}`
     : `/api/digest/${encodeURIComponent(city)}`;
   return apiFetch<DigestResponse>(`${BASE}${path}`);
+}
+
+export function searchDigests(q: string, city?: string): Promise<SearchResultItem[]> {
+  const params = new URLSearchParams({ q });
+  if (city) params.set('city', city);
+  return apiFetch<SearchResultItem[]>(`${BASE}/api/search?${params.toString()}`);
 }
 
 export async function subscribePush(

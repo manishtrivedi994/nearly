@@ -17,6 +17,34 @@ db.pragma('journal_mode = WAL');
 const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
 db.exec(schema);
 
+// Backfill digests_fts for any existing digests not yet indexed
+// (needed on first deploy after FTS was added)
+{
+  const digestCount = (db.prepare('SELECT COUNT(*) AS n FROM digests').get() as { n: number }).n;
+  const ftsCount = (db.prepare('SELECT COUNT(*) AS n FROM digests_fts').get() as { n: number }).n;
+
+  if (digestCount > 0 && ftsCount === 0) {
+    const existingDigests = db
+      .prepare('SELECT city_slug, digest_date, items_json FROM digests')
+      .all() as { city_slug: string; digest_date: string; items_json: string }[];
+
+    const insertFts = db.prepare(
+      `INSERT INTO digests_fts (title, summary, city_slug, digest_date, item_index) VALUES (?, ?, ?, ?, ?)`,
+    );
+
+    db.transaction(() => {
+      for (const digest of existingDigests) {
+        const items = JSON.parse(digest.items_json) as Array<{ title: string; summary: string }>;
+        for (let i = 0; i < items.length; i++) {
+          insertFts.run(items[i].title, items[i].summary, digest.city_slug, digest.digest_date, i);
+        }
+      }
+    })();
+
+    console.log(`[DB] Backfilled FTS for ${existingDigests.length} digest(s)`);
+  }
+}
+
 // Seed cities table on first run
 const cityCount = (db.prepare('SELECT COUNT(*) AS n FROM cities').get() as { n: number }).n;
 if (cityCount === 0) {

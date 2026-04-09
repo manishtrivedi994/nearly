@@ -4,6 +4,7 @@ import { Digest } from './pages/Digest';
 import { DigestDetail } from './pages/DigestDetail';
 import { Archive } from './pages/Archive';
 import { Bookmarks } from './pages/Bookmarks';
+import { Search } from './pages/Search';
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/bookmarks" element={<Bookmarks />} />
+        <Route path="/search" element={<Search />} />
         <Route path="/digest/:citySlug" element={<Digest />} />
         <Route path="/digest/:citySlug/archive" element={<Archive />} />
         <Route path="/digest/:citySlug/item/:itemIndex" element={<DigestDetail />} />

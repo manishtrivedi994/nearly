@@ -40,5 +40,16 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
   UNIQUE(endpoint, city_slug)
 );
 
+-- Full-text search index over digest items (title + summary)
+-- Populated and kept in sync by digestService.upsertDigest
+CREATE VIRTUAL TABLE IF NOT EXISTS digests_fts USING fts5(
+  title,
+  summary,
+  city_slug UNINDEXED,
+  digest_date UNINDEXED,
+  item_index UNINDEXED,
+  tokenize='porter unicode61'
+);
+
 CREATE INDEX IF NOT EXISTS idx_raw_items_city_fetched ON raw_items(city_slug, fetched_at);
 CREATE INDEX IF NOT EXISTS idx_digests_city_date ON digests(city_slug, digest_date);

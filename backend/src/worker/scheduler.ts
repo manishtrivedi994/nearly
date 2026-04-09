@@ -2,6 +2,7 @@ import type { Database } from 'better-sqlite3';
 import type { CityConfig, RawItem, SourceConfig } from '../types.js';
 import { fetchNewsAPI, fetchRSS, deduplicateItems, saveRawItems } from './fetcher.js';
 import { summarizeForCity } from './summarizer.js';
+import { upsertDigest } from '../services/digestService.js';
 import { sendPushToCity } from '../services/pushService.js';
 
 interface RawItemRow {
@@ -90,12 +91,9 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
       return;
     }
 
-    // Step 7: Upsert into digests (INSERT OR REPLACE on city_slug + digest_date)
+    // Step 7: Upsert into digests + keep FTS in sync
     step = 'upsert';
-    db.prepare(
-      `INSERT OR REPLACE INTO digests (city_slug, digest_date, items_json)
-       VALUES (?, ?, ?)`,
-    ).run(city.slug, date, JSON.stringify(digestItems));
+    upsertDigest(city.slug, date, digestItems);
 
     // Step 8: Done log + push notifications
     console.log(`[DONE] ${city.slug} — ${digestItems.length} items — ${date}`);
