@@ -57,7 +57,7 @@ async function callCerebras(city: CityConfig, batch: RawItem[], date: string): P
   });
 
   const response = await client.chat.completions.create({
-    model: 'llama3.3-70b',
+    model: 'llama3.1-8b',
     max_tokens: MAX_TOKENS,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
