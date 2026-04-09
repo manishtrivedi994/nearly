@@ -6,7 +6,6 @@ const cities: CityConfig[] = [
     display_name: 'Bangalore',
     sources: [
       { type: 'newsapi', query: 'Bangalore city news', language: 'en' },
-      { type: 'rss', url: 'https://bangaloremirror.indiatimes.com/rss.cms', name: 'Bangalore Mirror' },
       { type: 'rss', url: 'https://www.thehindu.com/news/cities/bangalore/feeder/default.rss', name: 'The Hindu Blr' },
     ],
   },
