@@ -4,7 +4,7 @@ import type { DigestItem } from '../types';
 import type { Bookmark } from '../hooks/useBookmarks';
 import type { SearchResultItem } from '../types';
 import { Badge } from './ui/Badge';
-import { getRelated } from '../lib/api';
+import { getRelated, postFlag } from '../lib/api';
 
 interface DigestCardProps {
   item: DigestItem;
@@ -41,6 +41,11 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
   const [related, setRelated] = useState<SearchResultItem[] | null>(null);
   const [relatedLoading, setRelatedLoading] = useState(false);
 
+  const [flagOpen, setFlagOpen] = useState(false);
+  const [flagReason, setFlagReason] = useState('');
+  const [flagNote, setFlagNote] = useState('');
+  const [flagState, setFlagState] = useState<'idle' | 'submitting' | 'done'>('idle');
+
   function handleBookmark(e: React.MouseEvent) {
     e.stopPropagation();
     onBookmark?.({
@@ -63,6 +68,33 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
         .catch(() => { setRelated([]); setRelatedLoading(false); });
     }
     setRelatedOpen((prev) => !prev);
+  }
+
+  function handleFlagToggle(e: React.MouseEvent) {
+    e.stopPropagation();
+    setFlagOpen((prev) => !prev);
+    setFlagReason('');
+    setFlagNote('');
+    setFlagState('idle');
+  }
+
+  function handleFlagSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!flagReason) return;
+    setFlagState('submitting');
+    postFlag({
+      title: item.title,
+      city_slug: item.city_slug,
+      date: date ?? '',
+      reason: flagReason,
+      note: flagNote,
+    })
+      .then(() => {
+        setFlagState('done');
+        setTimeout(() => setFlagOpen(false), 1500);
+      })
+      .catch(() => setFlagState('idle'));
   }
 
   return (
@@ -160,31 +192,43 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
         </span>
       </div>
 
-      {/* Row 5: related stories toggle */}
+      {/* Row 5: related stories toggle + flag button */}
       <div
-        onClick={handleRelatedToggle}
         style={{
           marginTop: 10,
           paddingTop: 8,
           borderTop: '1px solid var(--color-border)',
           display: 'flex',
           alignItems: 'center',
-          gap: 4,
+          justifyContent: 'space-between',
         }}
       >
-        <span
+        <div
+          onClick={handleRelatedToggle}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.3px' }}>
+            Related stories
+          </span>
+          <span style={{ fontSize: 9, color: 'var(--color-text-muted)', lineHeight: 1 }}>
+            {relatedOpen ? '▲' : '▾'}
+          </span>
+        </div>
+
+        <button
+          onClick={handleFlagToggle}
           style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
             fontSize: 10,
-            fontWeight: 600,
-            color: 'var(--color-text-muted)',
-            letterSpacing: '0.3px',
+            color: flagOpen ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+            padding: '0 2px',
+            fontFamily: 'var(--font-sans)',
           }}
         >
-          Related stories
-        </span>
-        <span style={{ fontSize: 9, color: 'var(--color-text-muted)', lineHeight: 1 }}>
-          {relatedOpen ? '▲' : '▾'}
-        </span>
+          Flag
+        </button>
       </div>
 
       {/* Related stories list */}
@@ -241,6 +285,101 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
                 </a>
               ))}
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Flag form */}
+      {flagOpen && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            marginTop: 8,
+            padding: '10px 12px',
+            background: 'var(--color-bg-secondary)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--color-border)',
+          }}
+        >
+          {flagState === 'done' ? (
+            <p style={{ fontSize: 11, color: '#1D9E75', margin: 0, fontWeight: 600 }}>
+              Reported — thanks for the feedback.
+            </p>
+          ) : (
+            <form onSubmit={handleFlagSubmit}>
+              {/* Radio options in 2-column grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', marginBottom: 8 }}>
+                {(['Wrong info', 'Outdated', 'Not local', 'Other'] as const).map((r) => (
+                  <label
+                    key={r}
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer' }}
+                  >
+                    <input
+                      type="radio"
+                      name="flag-reason"
+                      value={r}
+                      checked={flagReason === r}
+                      onChange={() => setFlagReason(r)}
+                      style={{ cursor: 'pointer', accentColor: 'var(--color-brand)' }}
+                    />
+                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{r}</span>
+                  </label>
+                ))}
+              </div>
+
+              <textarea
+                value={flagNote}
+                onChange={(e) => setFlagNote(e.target.value.slice(0, 100))}
+                placeholder="Optional note…"
+                rows={2}
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  fontSize: 11,
+                  fontFamily: 'var(--font-sans)',
+                  background: 'var(--color-bg-surface)',
+                  border: '1px solid var(--color-border-strong)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '5px 8px',
+                  color: 'var(--color-text-primary)',
+                  resize: 'none',
+                  outline: 'none',
+                  marginBottom: 8,
+                }}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>
+                  {flagNote.length}/100
+                </span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={handleFlagToggle}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'var(--font-sans)', padding: 0 }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!flagReason || flagState === 'submitting'}
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      fontFamily: 'var(--font-sans)',
+                      background: flagReason ? 'var(--color-bg-inverse)' : 'var(--color-border-strong)',
+                      color: flagReason ? 'var(--color-text-inverse)' : 'var(--color-text-muted)',
+                      border: 'none',
+                      borderRadius: 'var(--radius-pill)',
+                      padding: '4px 12px',
+                      cursor: flagReason ? 'pointer' : 'default',
+                      transition: 'var(--transition-fast)',
+                    }}
+                  >
+                    {flagState === 'submitting' ? 'Sending…' : 'Submit'}
+                  </button>
+                </div>
+              </div>
+            </form>
           )}
         </div>
       )}

@@ -56,6 +56,24 @@ export async function subscribePush(
   }
 }
 
+export async function postFlag(payload: {
+  title: string;
+  city_slug: string;
+  date: string;
+  reason: string;
+  note: string;
+}): Promise<void> {
+  const res = await fetch(`${BASE}/api/flag`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+}
+
 export async function triggerRun(password: string, citySlug?: string): Promise<void> {
   const res = await fetch(`${BASE}/api/admin/trigger-run`, {
     method: 'POST',
