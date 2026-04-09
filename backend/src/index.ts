@@ -9,7 +9,13 @@ import './db/client.js';
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN ?? '*' }));
+const allowedOrigins = (process.env.CORS_ORIGIN ?? '*')
+  .split(',')
+  .map((o) => o.trim());
+
+app.use(cors({
+  origin: allowedOrigins.includes('*') ? '*' : allowedOrigins,
+}));
 app.use(express.json());
 
 app.use('/api/digest', digestRouter);
