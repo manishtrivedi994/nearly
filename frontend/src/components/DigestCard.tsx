@@ -95,7 +95,7 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
         {item.title}
       </div>
 
-      {/* Row 3: summary (2-line clamp) */}
+      {/* Row 3: summary (5-line clamp) */}
       <div
         style={{
           fontSize: 11,
@@ -103,7 +103,7 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
           lineHeight: 1.5,
           marginTop: 4,
           display: '-webkit-box',
-          WebkitLineClamp: 2,
+          WebkitLineClamp: 5,
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden',
         }}
