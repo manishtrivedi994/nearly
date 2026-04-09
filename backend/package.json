@@ -11,12 +11,12 @@
     "test": "node --test tests/"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "axios": "^1",
     "better-sqlite3": "^9",
     "cors": "^2",
     "express": "^4.18",
     "node-cron": "^3",
+    "openai": "^6.34.0",
     "rss-parser": "^3"
   },
   "devDependencies": {

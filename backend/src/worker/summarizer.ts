@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 import type { RawItem, DigestItem, CityConfig, Category } from '../types.js';
 
 // Exact system prompt from CLAUDE.md — do not shorten or paraphrase.
@@ -47,35 +47,41 @@ function validateItem(obj: unknown): obj is DigestItem {
   );
 }
 
-async function callGemini(city: CityConfig, batch: RawItem[], date: string): Promise<DigestItem[]> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY env var is not set');
+async function callCerebras(city: CityConfig, batch: RawItem[], date: string): Promise<DigestItem[]> {
+  const apiKey = process.env.CEREBRAS_API_KEY;
+  if (!apiKey) throw new Error('CEREBRAS_API_KEY env var is not set');
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
-    systemInstruction: SYSTEM_PROMPT,
-    generationConfig: { maxOutputTokens: MAX_TOKENS },
+  const client = new OpenAI({
+    apiKey,
+    baseURL: 'https://api.cerebras.ai/v1',
   });
 
-  const response = await model.generateContent(buildUserPrompt(city, batch, date));
-  const rawText = response.response.text();
+  const response = await client.chat.completions.create({
+    model: 'llama-3.3-70b',
+    max_tokens: MAX_TOKENS,
+    messages: [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: buildUserPrompt(city, batch, date) },
+    ],
+  });
+
+  const rawText = response.choices[0]?.message?.content ?? '';
 
   // Tolerate any preamble/postamble the model adds around the array
   const jsonMatch = rawText.match(/\[[\s\S]*\]/);
   if (!jsonMatch) {
-    throw new Error(`Gemini response contained no JSON array:\n${rawText}`);
+    throw new Error(`Cerebras response contained no JSON array:\n${rawText}`);
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonMatch[0]);
   } catch {
-    throw new Error(`Failed to parse Gemini JSON:\n${jsonMatch[0]}`);
+    throw new Error(`Failed to parse Cerebras JSON:\n${jsonMatch[0]}`);
   }
 
   if (!Array.isArray(parsed)) {
-    throw new Error(`Parsed Gemini response is not an array`);
+    throw new Error(`Parsed Cerebras response is not an array`);
   }
 
   const valid = parsed.filter(validateItem);
@@ -85,7 +91,7 @@ async function callGemini(city: CityConfig, batch: RawItem[], date: string): Pro
   }
 
   if (valid.length === 0) {
-    throw new Error(`All ${parsed.length} item(s) from Gemini failed field validation`);
+    throw new Error(`All ${parsed.length} item(s) from Cerebras failed field validation`);
   }
 
   return valid;
@@ -112,21 +118,21 @@ export async function summarizeForCity(
     let items: DigestItem[];
 
     try {
-      items = await callGemini(city, batch, date);
+      items = await callCerebras(city, batch, date);
     } catch (err) {
       const message = (err as Error).message;
       console.error(`[ERROR] summarizeForCity ${city.slug} first attempt:`, message);
 
-      // Gemini 429: quota exhausted — retrying after 60s won't help
-      if (message.includes('429') || message.toLowerCase().includes('quota')) {
-        console.error(`[ERROR] summarizeForCity ${city.slug}: quota/rate limit hit, skipping`);
+      // 429: rate limit — retrying after 60s won't help if quota is daily
+      if (message.includes('429') || message.toLowerCase().includes('rate limit') || message.toLowerCase().includes('quota')) {
+        console.error(`[ERROR] summarizeForCity ${city.slug}: rate limit hit, skipping`);
         return [];
       }
 
       await new Promise<void>((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
 
       try {
-        items = await callGemini(city, batch, date);
+        items = await callCerebras(city, batch, date);
       } catch (retryErr) {
         console.error(
           `[ERROR] summarizeForCity ${city.slug} retry failed:`,
