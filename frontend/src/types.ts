@@ -23,11 +23,17 @@ export interface City {
   display_name: string;
 }
 
+export interface DigestSource {
+  source_name: string;
+  count: number;
+}
+
 export interface DigestResponse {
   city: string;        // city_slug
   date: string;        // YYYY-MM-DD
   generated_at: string;
   items: DigestItem[];
+  sources: DigestSource[];
 }
 
 export interface SearchResultItem {

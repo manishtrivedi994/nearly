@@ -19,11 +19,17 @@ interface FtsRow {
   item_index: number;
 }
 
+export interface DigestSource {
+  source_name: string;
+  count: number;
+}
+
 export interface DigestResponse {
   city: string;
   date: string;
   generated_at: string;
   items: DigestItem[];
+  sources: DigestSource[];
 }
 
 export interface CityResponse {
@@ -47,11 +53,25 @@ export function getDigest(citySlug: string, date: string): DigestResponse | null
 
   if (!row) return null;
 
+  // Count raw articles fetched per source on this IST date.
+  // fetched_at is stored as UTC; shift +5:30 to approximate IST date.
+  const sources = db
+    .prepare(
+      `SELECT source_name, COUNT(*) AS count
+       FROM raw_items
+       WHERE city_slug = ?
+         AND date(fetched_at, '+5 hours', '+30 minutes') = ?
+       GROUP BY source_name
+       ORDER BY count DESC`,
+    )
+    .all(citySlug, date) as DigestSource[];
+
   return {
     city: row.city_slug,
     date: row.digest_date,
     generated_at: row.generated_at,
     items: JSON.parse(row.items_json) as DigestItem[],
+    sources,
   };
 }
 

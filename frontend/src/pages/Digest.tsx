@@ -79,6 +79,7 @@ export function Digest() {
   const [copied, setCopied] = useState(false);
   const [notifyState, setNotifyState] = useState<'idle' | 'loading' | 'subscribed' | 'denied'>('idle');
   const [areaFilter, setAreaFilter] = useState<string | 'all'>('all');
+  const [sourcesOpen, setSourcesOpen] = useState(false);
 
   const pushSupported =
     typeof window !== 'undefined' &&
@@ -350,6 +351,72 @@ export function Digest() {
               }
             />
           ))}
+
+        {/* Sources transparency */}
+        {!loading && digest && digest.sources.length > 0 && (
+          <div
+            style={{
+              background: 'var(--color-bg-surface)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--color-border)',
+              overflow: 'hidden',
+              marginTop: 4,
+            }}
+          >
+            <button
+              onClick={() => setSourcesOpen((v) => !v)}
+              style={{
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '10px 14px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-sans)',
+              }}
+            >
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.3px' }}>
+                Sources used today ({digest.sources.length})
+              </span>
+              <span style={{ fontSize: 9, color: 'var(--color-text-muted)' }}>
+                {sourcesOpen ? '▲' : '▾'}
+              </span>
+            </button>
+
+            {sourcesOpen && (
+              <div style={{ borderTop: '1px solid var(--color-border)', padding: '6px 0' }}>
+                {digest.sources.map((s, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '5px 14px',
+                    }}
+                  >
+                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>
+                      {s.source_name}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: 'var(--color-text-muted)',
+                        background: 'var(--color-bg-secondary)',
+                        padding: '2px 7px',
+                        borderRadius: 'var(--radius-pill)',
+                      }}
+                    >
+                      {s.count} {s.count === 1 ? 'article' : 'articles'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
