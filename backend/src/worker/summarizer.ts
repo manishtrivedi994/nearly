@@ -5,7 +5,7 @@ import type { RawItem, DigestItem, CityConfig, Category } from '../types.js';
 const SYSTEM_PROMPT = [
   'You are a local news editor. Given raw news items for a city, return a clean daily digest.',
   'Output ONLY a valid JSON array. No markdown, no explanation, no preamble.',
-  'Each item must have: title (string), summary (2 sentences max), category (one of: civic/traffic/politics/weather/business/crime/culture), source_name (string), source_url (string), city_slug (string), relevance_score (float 0-1), area (string — the most specific neighbourhood or locality explicitly mentioned in the story, or null if the story is city-wide or no specific area is named).',
+  'Each item must have: title (string), summary (2 sentences max), category (one of: civic/traffic/politics/weather/business/crime/culture), source_name (string), source_url (string), city_slug (string), relevance_score (float 0-1), area (string — a specific neighbourhood, locality, or district WITHIN the city (e.g. Connaught Place, Dwarka, Lajpat Nagar for Delhi). Set to null if no specific intra-city area is named, or if the place mentioned is outside the city such as another state, city, or country).',
   'Remove duplicates, promotional content, and national news not relevant to the city.',
   'Sort by relevance_score descending. Return 5-8 items maximum.',
 ].join('\n');
