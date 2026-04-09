@@ -6,17 +6,19 @@ import type { CityConfig, SourceConfig } from '../types.js';
 interface CityRow {
   slug: string;
   display_name: string;
+  tier: number;
   sources_json: string;
 }
 
 function loadActiveCities(): CityConfig[] {
   const rows = db
-    .prepare('SELECT slug, display_name, sources_json FROM cities WHERE is_active = 1')
+    .prepare('SELECT slug, display_name, tier, sources_json FROM cities WHERE is_active = 1 ORDER BY tier ASC')
     .all() as CityRow[];
 
   return rows.map((row) => ({
     slug: row.slug,
     display_name: row.display_name,
+    tier: row.tier as 1 | 2 | 3,
     sources: JSON.parse(row.sources_json) as SourceConfig[],
   }));
 }

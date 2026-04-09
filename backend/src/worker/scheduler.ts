@@ -1,5 +1,5 @@
 import type { Database } from 'better-sqlite3';
-import type { CityConfig, RawItem, SourceConfig } from '../types.js';
+import type { CityConfig, RawItem } from '../types.js';
 import { fetchNewsAPI, fetchRSS, deduplicateItems, saveRawItems } from './fetcher.js';
 import { summarizeForCity } from './summarizer.js';
 import { upsertDigest } from '../services/digestService.js';
@@ -34,6 +34,7 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
     const rssItems: RawItem[] = [];
     for (const source of city.sources) {
       if (source.type === 'rss') {
+        if (!source.url) continue; // skip placeholder sources with empty url
         const items = await fetchRSS(source, city.slug);
         rssItems.push(...items);
       }

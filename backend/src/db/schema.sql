@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS cities (
   slug         TEXT    NOT NULL UNIQUE,  -- e.g. "bangalore", "delhi"
   display_name TEXT    NOT NULL,         -- e.g. "Bangalore"
   is_active    INTEGER NOT NULL DEFAULT 1,
+  tier         INTEGER NOT NULL DEFAULT 2,
   sources_json TEXT    NOT NULL          -- JSON array of SourceConfig
 );
 

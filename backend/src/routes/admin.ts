@@ -8,12 +8,13 @@ const router = Router();
 interface CityRow {
   slug: string;
   display_name: string;
+  tier: number;
   sources_json: string;
 }
 
 function loadCity(slug: string): CityConfig | null {
   const row = db
-    .prepare('SELECT slug, display_name, sources_json FROM cities WHERE slug = ? AND is_active = 1')
+    .prepare('SELECT slug, display_name, tier, sources_json FROM cities WHERE slug = ? AND is_active = 1')
     .get(slug) as CityRow | undefined;
 
   if (!row) return null;
@@ -21,18 +22,20 @@ function loadCity(slug: string): CityConfig | null {
   return {
     slug: row.slug,
     display_name: row.display_name,
+    tier: row.tier as 1 | 2 | 3,
     sources: JSON.parse(row.sources_json) as SourceConfig[],
   };
 }
 
 function loadAllActiveCities(): CityConfig[] {
   const rows = db
-    .prepare('SELECT slug, display_name, sources_json FROM cities WHERE is_active = 1')
+    .prepare('SELECT slug, display_name, tier, sources_json FROM cities WHERE is_active = 1 ORDER BY tier ASC')
     .all() as CityRow[];
 
   return rows.map((row) => ({
     slug: row.slug,
     display_name: row.display_name,
+    tier: row.tier as 1 | 2 | 3,
     sources: JSON.parse(row.sources_json) as SourceConfig[],
   }));
 }

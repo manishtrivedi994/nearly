@@ -28,6 +28,7 @@ export type SourceConfig = NewsApiSourceConfig | RssSourceConfig;
 export interface CityConfig {
   slug: string;
   display_name: string;
+  tier: 1 | 2 | 3;
   sources: SourceConfig[];
 }
 

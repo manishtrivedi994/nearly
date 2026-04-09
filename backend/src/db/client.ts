@@ -49,8 +49,8 @@ db.exec(schema);
 const cityCount = (db.prepare('SELECT COUNT(*) AS n FROM cities').get() as { n: number }).n;
 if (cityCount === 0) {
   const insert = db.prepare(`
-    INSERT INTO cities (slug, display_name, is_active, sources_json)
-    VALUES (@slug, @display_name, 1, @sources_json)
+    INSERT INTO cities (slug, display_name, is_active, tier, sources_json)
+    VALUES (@slug, @display_name, @is_active, @tier, @sources_json)
   `);
 
   const seedAll = db.transaction(() => {
@@ -58,6 +58,8 @@ if (cityCount === 0) {
       insert.run({
         slug: city.slug,
         display_name: city.display_name,
+        is_active: city.tier < 3 ? 1 : 0,
+        tier: city.tier,
         sources_json: JSON.stringify(city.sources),
       });
     }
