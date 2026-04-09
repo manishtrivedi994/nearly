@@ -3,12 +3,14 @@ import { Home } from './pages/Home';
 import { Digest } from './pages/Digest';
 import { DigestDetail } from './pages/DigestDetail';
 import { Archive } from './pages/Archive';
+import { Bookmarks } from './pages/Bookmarks';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/bookmarks" element={<Bookmarks />} />
         <Route path="/digest/:citySlug" element={<Digest />} />
         <Route path="/digest/:citySlug/archive" element={<Archive />} />
         <Route path="/digest/:citySlug/item/:itemIndex" element={<DigestDetail />} />

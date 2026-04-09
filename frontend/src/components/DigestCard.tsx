@@ -1,12 +1,45 @@
 import type { DigestItem } from '../types';
+import type { Bookmark } from '../hooks/useBookmarks';
 import { Badge } from './ui/Badge';
 
 interface DigestCardProps {
   item: DigestItem;
   onClick: () => void;
+  date?: string;
+  isBookmarked?: boolean;
+  onBookmark?: (bookmark: Bookmark) => void;
 }
 
-export function DigestCard({ item, onClick }: DigestCardProps) {
+function BookmarkIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    >
+      <path d="M2 2h10v11l-5-3-5 3V2z" />
+    </svg>
+  );
+}
+
+export function DigestCard({ item, onClick, date, isBookmarked = false, onBookmark }: DigestCardProps) {
+  function handleBookmark(e: React.MouseEvent) {
+    e.stopPropagation();
+    onBookmark?.({
+      title: item.title,
+      summary: item.summary,
+      source_url: item.source_url,
+      city_slug: item.city_slug,
+      date: date ?? '',
+      source_name: item.source_name,
+      category: item.category,
+    });
+  }
+
   return (
     <article
       onClick={onClick}
@@ -21,12 +54,32 @@ export function DigestCard({ item, onClick }: DigestCardProps) {
         transition: 'var(--transition-fast)',
       }}
     >
-      {/* Row 1: badge + source */}
+      {/* Row 1: badge + source + bookmark */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Badge category={item.category} />
-        <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>
-          {item.source_name}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>
+            {item.source_name}
+          </span>
+          {onBookmark && (
+            <button
+              onClick={handleBookmark}
+              aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 2,
+                display: 'flex',
+                alignItems: 'center',
+                color: isBookmarked ? 'var(--color-brand)' : 'var(--color-text-muted)',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              <BookmarkIcon filled={isBookmarked} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Row 2: title */}
@@ -58,7 +111,7 @@ export function DigestCard({ item, onClick }: DigestCardProps) {
         {item.summary}
       </div>
 
-      {/* Row 4: read more + time */}
+      {/* Row 4: read more + source */}
       <div
         style={{
           display: 'flex',

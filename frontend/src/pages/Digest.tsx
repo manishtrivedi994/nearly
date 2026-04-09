@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDigest } from '../hooks/useDigest';
+import { useBookmarks } from '../hooks/useBookmarks';
 import { getCities } from '../lib/api';
 import { DigestCard } from '../components/DigestCard';
 import { Navbar } from '../components/ui/Navbar';
@@ -60,6 +61,7 @@ export function Digest() {
   const [filter, setFilter] = useState<Filter>('all');
   const [cities, setCities] = useState<City[]>([]);
   const navigate = useNavigate();
+  const { isBookmarked, toggle } = useBookmarks();
 
   useEffect(() => {
     getCities().then(setCities).catch(() => {});
@@ -183,6 +185,9 @@ export function Digest() {
             <DigestCard
               key={i}
               item={item}
+              date={digest?.date}
+              isBookmarked={isBookmarked(item.source_url)}
+              onBookmark={toggle}
               onClick={() =>
                 navigate(`/digest/${citySlug}/item/${i}`, {
                   state: { item, items: digest?.items ?? [] },

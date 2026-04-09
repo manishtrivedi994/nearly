@@ -68,9 +68,20 @@ export function Navbar({
         )}
       </div>
 
-      {/* Right: archive link + city dropdown */}
-      {!showBack && (city || archiveHref) && (
+      {/* Right: bookmarks + archive link + city dropdown */}
+      {!showBack && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Link
+            to="/bookmarks"
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: 'var(--color-text-muted)',
+              letterSpacing: '0.3px',
+            }}
+          >
+            Bookmarks
+          </Link>
           {archiveHref && (
             <Link
               to={archiveHref}
