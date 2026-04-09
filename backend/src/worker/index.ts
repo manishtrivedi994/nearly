@@ -34,6 +34,8 @@ async function runAll(): Promise<void> {
   for (const city of cities) {
     // runPipelineForCity catches its own errors so one city never blocks the next
     await runPipelineForCity(city, db);
+    // Brief pause between cities to avoid hitting Gemini's per-minute rate limit
+    await new Promise<void>((resolve) => setTimeout(resolve, 5_000));
   }
 
   console.log('[INFO] Pipeline run complete');
