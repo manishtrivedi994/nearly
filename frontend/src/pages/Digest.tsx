@@ -161,7 +161,7 @@ export function Digest() {
     ? [...new Set(
         digest.items
           .map((i) => i.area)
-          .filter((a): a is string => typeof a === 'string' && a.trim() !== ''),
+          .filter((a): a is string => typeof a === 'string' && a.trim() !== '' && a !== 'null'),
       )].sort()
     : [];
 
