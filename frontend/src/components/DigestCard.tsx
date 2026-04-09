@@ -30,6 +30,12 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
   );
 }
 
+function scoreColor(score: number): string {
+  if (score >= 0.8) return '#1D9E75';
+  if (score >= 0.5) return '#EF9F27';
+  return '#B4B2A9';
+}
+
 export function DigestCard({ item, onClick, date, isBookmarked = false, onBookmark }: DigestCardProps) {
   const [relatedOpen, setRelatedOpen] = useState(false);
   const [related, setRelated] = useState<SearchResultItem[] | null>(null);
@@ -71,6 +77,7 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
         padding: 14,
         cursor: 'pointer',
         transition: 'var(--transition-fast)',
+        overflow: 'hidden',
       }}
     >
       {/* Row 1: badge + source + bookmark */}
@@ -237,6 +244,20 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
           )}
         </div>
       )}
+
+      {/* Relevance bar — 3px, bleeds to card edges, clipped by overflow:hidden */}
+      <div
+        title={`AI confidence: ${Math.round(item.relevance_score * 100)}%`}
+        style={{ margin: '10px -14px -14px', height: 3, background: 'var(--color-border)' }}
+      >
+        <div
+          style={{
+            height: '100%',
+            width: `${item.relevance_score * 100}%`,
+            background: scoreColor(item.relevance_score),
+          }}
+        />
+      </div>
     </article>
   );
 }
