@@ -54,7 +54,7 @@ export function Archive() {
           <p style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>
             {digest.items.length} item{digest.items.length !== 1 ? 's' : ''}
           </p>
-          {digest.items.map((item, i) => <DigestCard key={i} item={item} />)}
+          {digest.items.map((item, i) => <DigestCard key={i} item={item} onClick={() => {}} />)}
         </>
       )}
     </div>

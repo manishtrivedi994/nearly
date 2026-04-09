@@ -1,0 +1,81 @@
+:root {
+  /* Brand */
+  --color-brand: #1D9E75;
+  --color-brand-dark: #0F6E56;
+  --color-brand-light: #E1F5EE;
+  --color-brand-muted: #9FE1CB;
+
+  /* Backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #F7F6F2;
+  --color-bg-surface: #ffffff;
+  --color-bg-inverse: #0D1F1A;
+
+  /* Text */
+  --color-text-primary: #0D1F1A;
+  --color-text-secondary: #5F5E5A;
+  --color-text-muted: #888780;
+  --color-text-inverse: #E1F5EE;
+  --color-text-brand: #0F6E56;
+  --color-text-brand-on-dark: #5DCAA5;
+
+  /* Borders */
+  --color-border: #E8E6DF;
+  --color-border-strong: #D3D1C7;
+
+  /* Category badge colors */
+  --color-badge-civic-bg: #E1F5EE;
+  --color-badge-civic-text: #085041;
+  --color-badge-traffic-bg: #FAEEDA;
+  --color-badge-traffic-text: #633806;
+  --color-badge-politics-bg: #EEEDFE;
+  --color-badge-politics-text: #3C3489;
+  --color-badge-weather-bg: #E6F1FB;
+  --color-badge-weather-text: #0C447C;
+  --color-badge-business-bg: #EAF3DE;
+  --color-badge-business-text: #27500A;
+  --color-badge-crime-bg: #FCEBEB;
+  --color-badge-crime-text: #791F1F;
+  --color-badge-culture-bg: #FBEAF0;
+  --color-badge-culture-text: #72243E;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 26px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+}
+
+[data-theme="dark"] {
+  --color-bg-primary: #0D1F1A;
+  --color-bg-secondary: #122019;
+  --color-bg-surface: #163022;
+  --color-bg-inverse: #E1F5EE;
+  --color-text-primary: #E1F5EE;
+  --color-text-secondary: #9FE1CB;
+  --color-text-muted: #5DCAA5;
+  --color-border: #1E3A2F;
+  --color-border-strong: #2A4D3E;
+}

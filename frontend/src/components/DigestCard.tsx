@@ -1,52 +1,79 @@
-import type { DigestItem, Category } from '../types';
-
-const CATEGORY_COLORS: Record<Category, string> = {
-  civic:    '#2196F3',
-  traffic:  '#FF9800',
-  politics: '#9C27B0',
-  weather:  '#00BCD4',
-  business: '#4CAF50',
-  crime:    '#F44336',
-  culture:  '#FF5722',
-};
+import type { DigestItem } from '../types';
+import { Badge } from './ui/Badge';
 
 interface DigestCardProps {
   item: DigestItem;
+  onClick: () => void;
 }
 
-export function DigestCard({ item }: DigestCardProps) {
+export function DigestCard({ item, onClick }: DigestCardProps) {
   return (
-    <article style={{
-      border: '1px solid #e0e0e0',
-      borderRadius: 8,
-      padding: '16px',
-      marginBottom: 12,
-      background: '#fff',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <span style={{
-          background: CATEGORY_COLORS[item.category],
-          color: '#fff',
-          borderRadius: 4,
-          padding: '2px 9px',
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em',
-        }}>
-          {item.category}
+    <article
+      onClick={onClick}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-border-strong)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+      style={{
+        background: 'var(--color-bg-surface)',
+        borderRadius: 'var(--radius-lg)',
+        border: '1px solid var(--color-border)',
+        padding: 14,
+        cursor: 'pointer',
+        transition: 'var(--transition-fast)',
+      }}
+    >
+      {/* Row 1: badge + source */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Badge category={item.category} />
+        <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>
+          {item.source_name}
         </span>
       </div>
-      <h3 style={{ margin: '0 0 8px', fontSize: 16, lineHeight: 1.4 }}>{item.title}</h3>
-      <p style={{ margin: '0 0 12px', color: '#555', fontSize: 14, lineHeight: 1.6 }}>{item.summary}</p>
-      <a
-        href={item.source_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{ fontSize: 12, color: '#888', textDecoration: 'none' }}
+
+      {/* Row 2: title */}
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: 'var(--color-text-primary)',
+          lineHeight: 1.35,
+          marginTop: 6,
+        }}
       >
-        {item.source_name} ↗
-      </a>
+        {item.title}
+      </div>
+
+      {/* Row 3: summary (2-line clamp) */}
+      <div
+        style={{
+          fontSize: 11,
+          color: 'var(--color-text-secondary)',
+          lineHeight: 1.5,
+          marginTop: 4,
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+        }}
+      >
+        {item.summary}
+      </div>
+
+      {/* Row 4: read more + time */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 8,
+        }}
+      >
+        <span style={{ fontSize: 10, color: 'var(--color-text-brand)', fontWeight: 600 }}>
+          Read more →
+        </span>
+        <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>
+          {item.source_name}
+        </span>
+      </div>
     </article>
   );
 }
