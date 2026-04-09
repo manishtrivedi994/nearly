@@ -1,4 +1,4 @@
-import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { RawItem, DigestItem, CityConfig, Category } from '../types.js';
 
 // Exact system prompt from CLAUDE.md — do not shorten or paraphrase.
@@ -47,38 +47,35 @@ function validateItem(obj: unknown): obj is DigestItem {
   );
 }
 
-async function callGroq(city: CityConfig, batch: RawItem[], date: string): Promise<DigestItem[]> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) throw new Error('GROQ_API_KEY env var is not set');
+async function callGemini(city: CityConfig, batch: RawItem[], date: string): Promise<DigestItem[]> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('GEMINI_API_KEY env var is not set');
 
-  const groq = new Groq({ apiKey });
-
-  const response = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    max_tokens: MAX_TOKENS,
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: buildUserPrompt(city, batch, date) },
-    ],
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    systemInstruction: SYSTEM_PROMPT,
+    generationConfig: { maxOutputTokens: MAX_TOKENS },
   });
 
-  const rawText = response.choices[0]?.message?.content ?? '';
+  const response = await model.generateContent(buildUserPrompt(city, batch, date));
+  const rawText = response.response.text();
 
   // Tolerate any preamble/postamble the model adds around the array
   const jsonMatch = rawText.match(/\[[\s\S]*\]/);
   if (!jsonMatch) {
-    throw new Error(`Groq response contained no JSON array:\n${rawText}`);
+    throw new Error(`Gemini response contained no JSON array:\n${rawText}`);
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonMatch[0]);
   } catch {
-    throw new Error(`Failed to parse Groq JSON:\n${jsonMatch[0]}`);
+    throw new Error(`Failed to parse Gemini JSON:\n${jsonMatch[0]}`);
   }
 
   if (!Array.isArray(parsed)) {
-    throw new Error(`Parsed Groq response is not an array`);
+    throw new Error(`Parsed Gemini response is not an array`);
   }
 
   const valid = parsed.filter(validateItem);
@@ -88,7 +85,7 @@ async function callGroq(city: CityConfig, batch: RawItem[], date: string): Promi
   }
 
   if (valid.length === 0) {
-    throw new Error(`All ${parsed.length} item(s) from Groq failed field validation`);
+    throw new Error(`All ${parsed.length} item(s) from Gemini failed field validation`);
   }
 
   return valid;
@@ -115,25 +112,21 @@ export async function summarizeForCity(
     let items: DigestItem[];
 
     try {
-      items = await callGroq(city, batch, date);
+      items = await callGemini(city, batch, date);
     } catch (err) {
       const message = (err as Error).message;
       console.error(`[ERROR] summarizeForCity ${city.slug} first attempt:`, message);
 
-      // If it's a 429 rate-limit, check the actual retry-after window.
-      // Retrying after 60s is pointless when the model quota resets in hours.
-      if (message.includes('rate_limit_exceeded')) {
-        const match = message.match(/Please try again in ([^.]+)\./);
-        if (match) {
-          console.error(`[ERROR] summarizeForCity ${city.slug}: rate limit — retry in ${match[1]}, skipping`);
-          return [];
-        }
+      // Gemini 429: quota exhausted — retrying after 60s won't help
+      if (message.includes('429') || message.toLowerCase().includes('quota')) {
+        console.error(`[ERROR] summarizeForCity ${city.slug}: quota/rate limit hit, skipping`);
+        return [];
       }
 
       await new Promise<void>((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
 
       try {
-        items = await callGroq(city, batch, date);
+        items = await callGemini(city, batch, date);
       } catch (retryErr) {
         console.error(
           `[ERROR] summarizeForCity ${city.slug} retry failed:`,
