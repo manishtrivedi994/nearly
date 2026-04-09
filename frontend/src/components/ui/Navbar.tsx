@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BackButton } from './BackButton';
 import { CityDropdown } from './CityDropdown';
+import { AuthModal } from '../AuthModal';
+import { useAuth } from '../../hooks/useAuth';
 import type { City } from '../../types';
 
 interface NavbarProps {
@@ -37,8 +39,10 @@ export function Navbar({
   streak = 0,
 }: NavbarProps) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [authOpen, setAuthOpen] = useState(false);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -199,9 +203,38 @@ export function Navbar({
                 onSelect={onCitySelect}
               />
             )}
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 11, color: 'var(--color-text-muted)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {user.email}
+                </span>
+                <button
+                  onClick={logout}
+                  style={{
+                    background: 'none', border: '1px solid var(--color-border)',
+                    borderRadius: 6, cursor: 'pointer', fontSize: 11,
+                    color: 'var(--color-text-muted)', padding: '3px 8px',
+                  }}
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAuthOpen(true)}
+                style={{
+                  background: 'none', border: '1px solid var(--color-border)',
+                  borderRadius: 6, cursor: 'pointer', fontSize: 11,
+                  fontWeight: 500, color: 'var(--color-text-primary)', padding: '3px 8px',
+                }}
+              >
+                Sign in
+              </button>
+            )}
           </div>
         )
       )}
+      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
     </nav>
   );
 }

@@ -40,6 +40,15 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
   UNIQUE(endpoint, city_slug)
 );
 
+-- Registered users for personalisation (auth is opt-in, digest pages stay public)
+CREATE TABLE IF NOT EXISTS users (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  email         TEXT    NOT NULL UNIQUE,
+  password_hash TEXT    NOT NULL,
+  city_slug     TEXT,
+  created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Full-text search index over digest items (title + summary)
 -- Populated and kept in sync by digestService.upsertDigest
 CREATE VIRTUAL TABLE IF NOT EXISTS digests_fts USING fts5(

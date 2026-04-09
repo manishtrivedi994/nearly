@@ -6,9 +6,11 @@ import { Archive } from './pages/Archive';
 import { Bookmarks } from './pages/Bookmarks';
 import { Search } from './pages/Search';
 import { CategoryPage } from './pages/CategoryPage';
+import { AuthProvider } from './hooks/useAuth';
 
 export default function App() {
   return (
+    <AuthProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -23,5 +25,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </AuthProvider>
   );
 }

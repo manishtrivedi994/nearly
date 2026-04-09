@@ -74,6 +74,30 @@ export async function postFlag(payload: {
   }
 }
 
+export async function signup(email: string, password: string, city_slug?: string): Promise<string> {
+  const res = await fetch(`${BASE}/api/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password, city_slug: city_slug ?? null }),
+  });
+  const body = await res.json().catch(() => ({})) as { token?: string; error?: string };
+  if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+  if (!body.token) throw new Error('No token in response');
+  return body.token;
+}
+
+export async function login(email: string, password: string): Promise<string> {
+  const res = await fetch(`${BASE}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const body = await res.json().catch(() => ({})) as { token?: string; error?: string };
+  if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+  if (!body.token) throw new Error('No token in response');
+  return body.token;
+}
+
 export async function triggerRun(password: string, citySlug?: string): Promise<void> {
   const res = await fetch(`${BASE}/api/admin/trigger-run`, {
     method: 'POST',

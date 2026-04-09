@@ -6,6 +6,7 @@ import adminRouter from './routes/admin.js';
 import pushRouter from './routes/push.js';
 import searchRouter from './routes/search.js';
 import flagRouter from './routes/flag.js';
+import authRouter from './routes/auth.js';
 
 // db/client is imported for its side effect: schema init + city seeding
 import './db/client.js';
@@ -27,6 +28,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/push', pushRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/flag', flagRouter);
+app.use('/api/auth', authRouter);
 
 // Simple health check — useful for Railway deploy probes
 app.get('/health', (_req, res) => {
