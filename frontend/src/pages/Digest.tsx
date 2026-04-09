@@ -21,7 +21,7 @@ export function Digest() {
   if (error) {
     return (
       <div style={{ maxWidth: 700, margin: '40px auto', padding: '0 16px' }}>
-        <Link to="/">← Cities</Link>
+        <Link to="/"><img src="/nearly-icon.svg" alt="nearly." style={{ width: 32 }} /></Link>
         <p style={{ color: '#c00', marginTop: 16 }}>{error}</p>
       </div>
     );
@@ -37,19 +37,23 @@ export function Digest() {
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         marginBottom: 20,
       }}>
-        <div>
-          <Link to="/" style={{ fontSize: 14 }}>← Cities</Link>
-          <h2 style={{ margin: '6px 0 2px', fontSize: 22 }}>
-            {capitalize(digest.city)} — {digest.date}
-          </h2>
-          <span style={{ fontSize: 12, color: '#999' }}>
-            Generated {new Date(digest.generated_at).toLocaleTimeString()}
-          </span>
+        <Link to="/">
+          <img src="/nearly-icon.svg" alt="nearly." style={{ width: 36, display: 'block' }} />
+        </Link>
+        <div style={{ textAlign: 'center', flex: 1, padding: '0 12px' }}>
+          <div style={{ fontWeight: 700, fontSize: 18 }}>
+            {capitalize(digest.city)}
+          </div>
+          <div style={{ fontSize: 12, color: '#999' }}>
+            {digest.date} · Generated {new Date(digest.generated_at).toLocaleTimeString()}
+          </div>
         </div>
-        <Link to={`/archive/${city}`} style={{ fontSize: 14, marginTop: 4 }}>Archive →</Link>
+        <Link to={`/archive/${city}`} style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>
+          Archive →
+        </Link>
       </div>
 
       <FilterBar selected={filter} onChange={setFilter} />

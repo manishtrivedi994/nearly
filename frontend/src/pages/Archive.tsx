@@ -4,7 +4,7 @@ import { useDigest } from '../hooks/useDigest';
 import { DigestCard } from '../components/DigestCard';
 
 function todayLocal(): string {
-  return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  return new Date().toLocaleDateString('en-CA');
 }
 
 function capitalize(s: string): string {
@@ -18,9 +18,21 @@ export function Archive() {
 
   return (
     <div style={{ maxWidth: 700, margin: '0 auto', padding: '24px 16px' }}>
-      <div style={{ marginBottom: 20 }}>
-        <Link to={`/digest/${city}`} style={{ fontSize: 14 }}>← Today's digest</Link>
-        <h2 style={{ margin: '6px 0', fontSize: 22 }}>{capitalize(city)} — archive</h2>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+      }}>
+        <Link to="/">
+          <img src="/nearly-icon.svg" alt="nearly." style={{ width: 36, display: 'block' }} />
+        </Link>
+        <div style={{ textAlign: 'center', flex: 1, padding: '0 12px' }}>
+          <div style={{ fontWeight: 700, fontSize: 18 }}>{capitalize(city)} — archive</div>
+        </div>
+        <Link to={`/digest/${city}`} style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>
+          ← Today
+        </Link>
       </div>
 
       <div style={{ marginBottom: 20 }}>

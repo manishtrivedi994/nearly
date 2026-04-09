@@ -23,8 +23,12 @@ export function Home() {
 
   return (
     <div style={{ maxWidth: 560, margin: '80px auto', padding: '0 16px', textAlign: 'center' }}>
-      <h1 style={{ fontSize: 32, marginBottom: 8 }}>Today in your city</h1>
-      <p style={{ color: '#666', marginBottom: 32 }}>
+      <img
+        src="/nearly-horizontal.svg"
+        alt="nearly."
+        style={{ width: 220, marginBottom: 24 }}
+      />
+      <p style={{ color: '#666', marginBottom: 32, fontSize: 15 }}>
         A 2-minute AI-curated local news digest.
       </p>
       {loadError ? (
