@@ -1,29 +1,41 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getCities } from '../lib/api';
+import { getCities, getPreferences } from '../lib/api';
+import { useAuth } from '../hooks/useAuth';
 import type { City } from '../types';
 
 export function Home() {
   const [cities, setCities] = useState<City[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   useEffect(() => {
-    getCities()
-      .then((data) => {
-        const stored = localStorage.getItem('nearly_last_city');
-        if (stored) {
-          const valid = data.some((c) => c.slug === stored);
-          if (valid) {
-            navigate(`/digest/${stored}`, { replace: true });
-            return;
-          }
-          localStorage.removeItem('nearly_last_city');
+    async function init() {
+      let lastCity: string | null = null;
+
+      if (token) {
+        const prefs = await getPreferences(token).catch(() => null);
+        lastCity = prefs?.last_city ?? null;
+      }
+      if (!lastCity) {
+        lastCity = localStorage.getItem('nearly_last_city');
+      }
+
+      const data = await getCities();
+      if (lastCity) {
+        const valid = data.some((c) => c.slug === lastCity);
+        if (valid) {
+          navigate(`/digest/${lastCity}`, { replace: true });
+          return;
         }
-        setCities(data);
-      })
-      .catch((err: unknown) => setLoadError((err as Error).message));
-  }, [navigate]);
+        if (!token) localStorage.removeItem('nearly_last_city');
+      }
+      setCities(data);
+    }
+
+    init().catch((err: unknown) => setLoadError((err as Error).message));
+  }, [navigate, token]);
 
   return (
     <div

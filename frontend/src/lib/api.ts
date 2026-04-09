@@ -74,6 +74,87 @@ export async function postFlag(payload: {
   }
 }
 
+// ─── /api/me — authenticated user data ───────────────────────────────────────
+
+function authHeaders(token: string) {
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+}
+
+export interface ApiBookmark {
+  id: number;
+  title: string;
+  summary: string;
+  source_url: string;
+  city_slug: string;
+  digest_date: string;
+  source_name: string;
+  category: string;
+  saved_at: string;
+}
+
+export interface ApiPreferences {
+  last_city: string | null;
+  language: string;
+}
+
+export async function getBookmarks(token: string): Promise<ApiBookmark[]> {
+  const res = await fetch(`${BASE}/api/me/bookmarks`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return [];
+  return res.json() as Promise<ApiBookmark[]>;
+}
+
+export async function addBookmark(token: string, data: Omit<ApiBookmark, 'id' | 'saved_at'>): Promise<ApiBookmark> {
+  const res = await fetch(`${BASE}/api/me/bookmarks`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<ApiBookmark>;
+}
+
+export async function removeBookmark(token: string, id: number): Promise<void> {
+  const res = await fetch(`${BASE}/api/me/bookmarks/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+}
+
+export async function getReadDates(token: string): Promise<{ id: number; read_date: string; city_slug: string }[]> {
+  const res = await fetch(`${BASE}/api/me/read-dates`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return [];
+  return res.json() as Promise<{ id: number; read_date: string; city_slug: string }[]>;
+}
+
+export async function postReadDate(token: string, read_date: string, city_slug: string): Promise<void> {
+  await fetch(`${BASE}/api/me/read-dates`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify({ read_date, city_slug }),
+  });
+}
+
+export async function getPreferences(token: string): Promise<ApiPreferences> {
+  const res = await fetch(`${BASE}/api/me/preferences`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return { last_city: null, language: 'en' };
+  return res.json() as Promise<ApiPreferences>;
+}
+
+export async function patchPreferences(token: string, data: Partial<ApiPreferences>): Promise<void> {
+  await fetch(`${BASE}/api/me/preferences`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify(data),
+  });
+}
+
 export async function signup(email: string, password: string, city_slug?: string): Promise<string> {
   const res = await fetch(`${BASE}/api/auth/signup`, {
     method: 'POST',

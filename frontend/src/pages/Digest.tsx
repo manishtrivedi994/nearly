@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDigest } from '../hooks/useDigest';
 import { useBookmarks } from '../hooks/useBookmarks';
 import { useStreak } from '../hooks/useStreak';
-import { getCities, subscribePush } from '../lib/api';
+import { useAuth } from '../hooks/useAuth';
+import { getCities, subscribePush, patchPreferences } from '../lib/api';
 import { DigestCard } from '../components/DigestCard';
 import { Navbar } from '../components/ui/Navbar';
 import { FilterChip } from '../components/ui/FilterChip';
@@ -75,7 +76,8 @@ export function Digest() {
   const [cities, setCities] = useState<City[]>([]);
   const navigate = useNavigate();
   const { isBookmarked, toggle } = useBookmarks();
-  const streak = useStreak();
+  const { streak, markRead } = useStreak();
+  const { token } = useAuth();
   const [copied, setCopied] = useState(false);
   const [notifyState, setNotifyState] = useState<'idle' | 'loading' | 'subscribed' | 'denied'>('idle');
   const [areaFilter, setAreaFilter] = useState<string | 'all'>('all');
@@ -90,10 +92,13 @@ export function Digest() {
     getCities().then(setCities).catch(() => {});
   }, []);
 
-  // Persist last visited city
+  // Persist last visited city + mark read
   useEffect(() => {
-    if (citySlug) localStorage.setItem('nearly_last_city', citySlug);
-  }, [citySlug]);
+    if (!citySlug) return;
+    localStorage.setItem('nearly_last_city', citySlug);
+    if (token) patchPreferences(token, { last_city: citySlug }).catch(() => {});
+    markRead(citySlug);
+  }, [citySlug, token, markRead]);
 
   // Reset filters when city changes
   useEffect(() => {

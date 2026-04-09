@@ -60,5 +60,40 @@ CREATE VIRTUAL TABLE IF NOT EXISTS digests_fts USING fts5(
   tokenize='porter unicode61'
 );
 
+-- User bookmarks — one row per saved story per user
+CREATE TABLE IF NOT EXISTS user_bookmarks (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title       TEXT    NOT NULL,
+  summary     TEXT    NOT NULL,
+  source_url  TEXT    NOT NULL,
+  city_slug   TEXT    NOT NULL,
+  digest_date TEXT    NOT NULL,
+  source_name TEXT    NOT NULL DEFAULT '',
+  category    TEXT    NOT NULL DEFAULT '',
+  saved_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+-- User read dates — one row per (user, date, city) for streak tracking
+CREATE TABLE IF NOT EXISTS user_read_dates (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  read_date   TEXT    NOT NULL,
+  city_slug   TEXT    NOT NULL,
+  UNIQUE(user_id, read_date, city_slug)
+);
+
+-- User preferences — one row per user
+CREATE TABLE IF NOT EXISTS user_preferences (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  last_city   TEXT,
+  language    TEXT    NOT NULL DEFAULT 'en',
+  created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_raw_items_city_fetched ON raw_items(city_slug, fetched_at);
 CREATE INDEX IF NOT EXISTS idx_digests_city_date ON digests(city_slug, digest_date);
+CREATE INDEX IF NOT EXISTS idx_user_bookmarks_user ON user_bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_read_dates_user ON user_read_dates(user_id);
