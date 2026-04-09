@@ -78,6 +78,7 @@ export function Digest() {
   const streak = useStreak();
   const [copied, setCopied] = useState(false);
   const [notifyState, setNotifyState] = useState<'idle' | 'loading' | 'subscribed' | 'denied'>('idle');
+  const [areaFilter, setAreaFilter] = useState<string | 'all'>('all');
 
   const pushSupported =
     typeof window !== 'undefined' &&
@@ -93,9 +94,10 @@ export function Digest() {
     if (citySlug) localStorage.setItem('nearly_last_city', citySlug);
   }, [citySlug]);
 
-  // Reset filter when city changes
+  // Reset filters when city changes
   useEffect(() => {
     setFilter('all');
+    setAreaFilter('all');
   }, [citySlug]);
 
   const displayCity = citySlug.charAt(0).toUpperCase() + citySlug.slice(1);
@@ -145,13 +147,22 @@ export function Digest() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const items =
-    filter === 'all'
-      ? (digest?.items ?? [])
-      : (digest?.items ?? []).filter((i) => i.category === filter);
+  const allItems = digest?.items ?? [];
+
+  const items = allItems
+    .filter((i) => filter === 'all' || i.category === filter)
+    .filter((i) => areaFilter === 'all' || i.area === areaFilter);
 
   const uniqueCategories: Category[] = digest
     ? ([...new Set(digest.items.map((i) => i.category))] as Category[])
+    : [];
+
+  const uniqueAreas: string[] = digest
+    ? [...new Set(
+        digest.items
+          .map((i) => i.area)
+          .filter((a): a is string => typeof a === 'string' && a.trim() !== ''),
+      )].sort()
     : [];
 
   return (
@@ -268,6 +279,31 @@ export function Digest() {
           />
         ))}
       </div>
+
+      {/* Area filter row — only rendered when digest has area-tagged items */}
+      {uniqueAreas.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            gap: 6,
+            padding: '8px 16px',
+            background: 'var(--color-bg-secondary)',
+            borderBottom: '1px solid var(--color-border)',
+            overflowX: 'auto',
+            msOverflowStyle: 'none',
+          }}
+        >
+          <FilterChip label="All areas" active={areaFilter === 'all'} onClick={() => setAreaFilter('all')} />
+          {uniqueAreas.map((area) => (
+            <FilterChip
+              key={area}
+              label={area}
+              active={areaFilter === area}
+              onClick={() => setAreaFilter(area)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Feed */}
       <div

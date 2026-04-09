@@ -15,6 +15,7 @@ export interface DigestItem {
   source_url: string;
   city_slug: string;
   relevance_score: number;
+  area?: string | null;  // most specific neighbourhood mentioned, null = city-wide
 }
 
 export interface City {

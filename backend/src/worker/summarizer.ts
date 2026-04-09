@@ -5,7 +5,7 @@ import type { RawItem, DigestItem, CityConfig, Category } from '../types.js';
 const SYSTEM_PROMPT = [
   'You are a local news editor. Given raw news items for a city, return a clean daily digest.',
   'Output ONLY a valid JSON array. No markdown, no explanation, no preamble.',
-  'Each item must have: title (string), summary (2 sentences max), category (one of: civic/traffic/politics/weather/business/crime/culture), source_name (string), source_url (string), city_slug (string), relevance_score (float 0-1).',
+  'Each item must have: title (string), summary (2 sentences max), category (one of: civic/traffic/politics/weather/business/crime/culture), source_name (string), source_url (string), city_slug (string), relevance_score (float 0-1), area (string — the most specific neighbourhood or locality explicitly mentioned in the story, or null if the story is city-wide or no specific area is named).',
   'Remove duplicates, promotional content, and national news not relevant to the city.',
   'Sort by relevance_score descending. Return 5-8 items maximum.',
 ].join('\n');
@@ -34,6 +34,7 @@ function buildUserPrompt(city: CityConfig, items: RawItem[], date: string): stri
 function validateItem(obj: unknown): obj is DigestItem {
   if (typeof obj !== 'object' || obj === null) return false;
   const item = obj as Record<string, unknown>;
+  const areaOk = !('area' in item) || item.area === null || typeof item.area === 'string';
   return (
     typeof item.title === 'string' && item.title.trim() !== '' &&
     typeof item.summary === 'string' && item.summary.trim() !== '' &&
@@ -43,7 +44,8 @@ function validateItem(obj: unknown): obj is DigestItem {
     typeof item.city_slug === 'string' && item.city_slug.trim() !== '' &&
     typeof item.relevance_score === 'number' &&
     item.relevance_score >= 0 &&
-    item.relevance_score <= 1
+    item.relevance_score <= 1 &&
+    areaOk
   );
 }
 
