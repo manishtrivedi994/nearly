@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { BackButton } from './BackButton';
 import { CityDropdown } from './CityDropdown';
 import type { City } from '../../types';
@@ -10,6 +11,7 @@ interface NavbarProps {
   city?: string;
   cities?: City[];
   onCitySelect?: (slug: string) => void;
+  archiveHref?: string;
 }
 
 export function Navbar({
@@ -20,6 +22,7 @@ export function Navbar({
   city,
   cities,
   onCitySelect,
+  archiveHref,
 }: NavbarProps) {
   return (
     <nav
@@ -36,6 +39,7 @@ export function Navbar({
         zIndex: 100,
       }}
     >
+      {/* Left: logo or back button */}
       <div>
         {showBack && onBack ? (
           <BackButton label={backLabel} onClick={onBack} />
@@ -64,12 +68,30 @@ export function Navbar({
         )}
       </div>
 
-      {city && !showBack && cities && onCitySelect && (
-        <CityDropdown
-          currentCity={city}
-          cities={cities}
-          onSelect={onCitySelect}
-        />
+      {/* Right: archive link + city dropdown */}
+      {!showBack && (city || archiveHref) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {archiveHref && (
+            <Link
+              to={archiveHref}
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: 'var(--color-text-muted)',
+                letterSpacing: '0.3px',
+              }}
+            >
+              Archive
+            </Link>
+          )}
+          {city && cities && onCitySelect && (
+            <CityDropdown
+              currentCity={city}
+              cities={cities}
+              onSelect={onCitySelect}
+            />
+          )}
+        </div>
       )}
     </nav>
   );

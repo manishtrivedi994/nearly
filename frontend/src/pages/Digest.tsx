@@ -55,8 +55,8 @@ function SkeletonCard() {
 }
 
 export function Digest() {
-  const { citySlug = '' } = useParams<{ citySlug: string }>();
-  const { digest, loading, error } = useDigest(citySlug);
+  const { citySlug = '', date } = useParams<{ citySlug: string; date?: string }>();
+  const { digest, loading, error } = useDigest(citySlug, date);
   const [filter, setFilter] = useState<Filter>('all');
   const [cities, setCities] = useState<City[]>([]);
   const navigate = useNavigate();
@@ -93,6 +93,7 @@ export function Digest() {
         cities={cities}
         onCitySelect={(slug) => navigate(`/digest/${slug}`)}
         onLogoClick={() => navigate('/')}
+        archiveHref={`/digest/${citySlug}/archive`}
       />
 
       {/* Hero band */}
@@ -117,7 +118,7 @@ export function Digest() {
             marginTop: 4,
           }}
         >
-          Today in your city
+          {date ? 'Past digest' : 'Today in your city'}
         </div>
         <div style={{ fontSize: 12, color: 'var(--color-brand-muted)', marginTop: 4 }}>
           {digest ? `${digest.items.length} stories · 2 min read` : '\u00a0'}

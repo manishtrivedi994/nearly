@@ -10,8 +10,10 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/digest/:citySlug" element={<Digest />} />
+        <Route path="/digest/:citySlug/archive" element={<Archive />} />
         <Route path="/digest/:citySlug/item/:itemIndex" element={<DigestDetail />} />
-        <Route path="/archive/:citySlug" element={<Archive />} />
+        {/* date-specific digest — must come after /archive and /item/:itemIndex */}
+        <Route path="/digest/:citySlug/:date" element={<Digest />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
