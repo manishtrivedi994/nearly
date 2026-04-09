@@ -25,6 +25,15 @@ const cities: CityConfig[] = [
       { type: 'rss', url: 'https://www.mid-day.com/rss/news', name: 'Mid-Day' },
     ],
   },
+  {
+    slug: 'chennai',
+    display_name: 'Chennai',
+    sources: [
+      { type: 'newsapi', query: 'Chennai city news', language: 'en' },
+      { type: 'rss', url: 'TBD', name: 'Hindu Chennai' },
+      { type: 'rss', url: 'TBD', name: 'Times of India' },
+    ],
+  },
 ];
 
 export default cities;
