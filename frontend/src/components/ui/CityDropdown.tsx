@@ -70,9 +70,10 @@ export function CityDropdown({ currentCity, cities, onSelect }: CityDropdownProp
             border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-md)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-            minWidth: 140,
+            minWidth: 160,
+            maxHeight: '60vh',
+            overflowY: 'auto',
             zIndex: 200,
-            overflow: 'hidden',
           }}
         >
           {cities.map((city) => (
