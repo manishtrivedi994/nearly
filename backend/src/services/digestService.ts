@@ -82,6 +82,89 @@ export function upsertDigest(citySlug: string, date: string, items: DigestItem[]
   })();
 }
 
+const STOP_WORDS = new Set([
+  'the', 'a', 'an', 'and', 'or', 'of', 'in', 'on', 'at', 'to', 'for',
+  'is', 'are', 'was', 'were', 'with', 'from', 'by', 'as', 'its', 'it',
+  'be', 'been', 'has', 'have', 'had', 'that', 'this', 'will', 'new',
+  'after', 'over', 'into', 'up', 'out', 'about', 'also', 'than',
+]);
+
+// Extracts meaningful keywords from a news title for OR-based FTS5 matching
+// against the title column only.
+function buildRelatedQuery(title: string): string {
+  const tokens = title
+    .replace(/[^\w\s]/g, ' ')
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((t) => t.length >= 4 && !STOP_WORDS.has(t) && !/^\d+$/.test(t));
+
+  if (tokens.length === 0) return '';
+  // OR match — at least one keyword must appear in the candidate's title
+  return tokens.slice(0, 5).map((t) => `title:"${t}"*`).join(' OR ');
+}
+
+// Returns up to `limit` DigestItems related to the given title and category
+// from the last `days` days, excluding the source item itself.
+export function getRelatedStories(
+  citySlug: string,
+  title: string,
+  category: string,
+  days = 30,
+  limit = 3,
+): SearchResultItem[] {
+  const ftsQuery = buildRelatedQuery(title);
+  if (!ftsQuery) return [];
+
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+  // Fetch more than needed to account for category filtering and self-exclusion
+  const rows = db
+    .prepare(
+      `SELECT city_slug, digest_date, item_index
+       FROM digests_fts
+       WHERE digests_fts MATCH ? AND city_slug = ? AND digest_date >= ?
+       ORDER BY rank
+       LIMIT ?`,
+    )
+    .all(ftsQuery, citySlug, cutoffStr, limit * 6) as FtsRow[];
+
+  // Group by (city_slug, digest_date) to minimise digest reads
+  const groups = new Map<string, FtsRow[]>();
+  for (const row of rows) {
+    const key = `${row.city_slug}::${row.digest_date}`;
+    const bucket = groups.get(key);
+    if (bucket) bucket.push(row);
+    else groups.set(key, [row]);
+  }
+
+  const normalizedTitle = title.toLowerCase().trim();
+  const results: SearchResultItem[] = [];
+
+  for (const groupRows of groups.values()) {
+    if (results.length >= limit) break;
+    const { city_slug, digest_date } = groupRows[0];
+    const digestRow = db
+      .prepare(`SELECT items_json FROM digests WHERE city_slug = ? AND digest_date = ?`)
+      .get(city_slug, digest_date) as { items_json: string } | undefined;
+
+    if (!digestRow) continue;
+    const items = JSON.parse(digestRow.items_json) as DigestItem[];
+
+    for (const row of groupRows) {
+      if (results.length >= limit) break;
+      const item = items[row.item_index];
+      if (!item) continue;
+      if (item.category !== category) continue;
+      if (item.title.toLowerCase().trim() === normalizedTitle) continue; // exclude self
+      results.push({ item, date: digest_date, city_slug });
+    }
+  }
+
+  return results;
+}
+
 // Sanitizes a user query for safe use in FTS5 MATCH expressions.
 // Each whitespace-delimited token becomes a prefix search term; all must match (implicit AND).
 function sanitizeFtsQuery(q: string): string {

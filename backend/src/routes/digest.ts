@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getDigest, getCategoryItems } from '../services/digestService.js';
+import { getDigest, getCategoryItems, getRelatedStories } from '../services/digestService.js';
 
 const VALID_CATEGORIES = new Set([
   'civic', 'traffic', 'politics', 'weather', 'business', 'crime', 'culture',
@@ -32,6 +32,27 @@ router.get('/:citySlug/areas', (req, res) => {
   ].sort();
 
   res.json({ areas });
+});
+
+// GET /api/digest/:citySlug/related?title=<encoded>&category=<category>
+// Returns up to 3 past DigestItems matching category via FTS on title keywords.
+// Must be registered before /:citySlug/:date? so "related" isn't treated as a date.
+router.get('/:citySlug/related', (req, res) => {
+  const { citySlug } = req.params;
+  const title = typeof req.query.title === 'string' ? req.query.title.trim() : '';
+  const category = typeof req.query.category === 'string' ? req.query.category.trim() : '';
+
+  if (!title) {
+    res.status(400).json({ error: 'title param is required' });
+    return;
+  }
+  if (!VALID_CATEGORIES.has(category)) {
+    res.status(400).json({ error: 'Invalid category' });
+    return;
+  }
+
+  const items = getRelatedStories(citySlug, title, category);
+  res.json(items);
 });
 
 // GET /api/digest/:citySlug/category/:category

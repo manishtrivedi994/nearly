@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { DigestItem } from '../types';
 import type { Bookmark } from '../hooks/useBookmarks';
+import type { SearchResultItem } from '../types';
 import { Badge } from './ui/Badge';
+import { getRelated } from '../lib/api';
 
 interface DigestCardProps {
   item: DigestItem;
@@ -28,6 +31,10 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 }
 
 export function DigestCard({ item, onClick, date, isBookmarked = false, onBookmark }: DigestCardProps) {
+  const [relatedOpen, setRelatedOpen] = useState(false);
+  const [related, setRelated] = useState<SearchResultItem[] | null>(null);
+  const [relatedLoading, setRelatedLoading] = useState(false);
+
   function handleBookmark(e: React.MouseEvent) {
     e.stopPropagation();
     onBookmark?.({
@@ -39,6 +46,17 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
       source_name: item.source_name,
       category: item.category,
     });
+  }
+
+  function handleRelatedToggle(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!relatedOpen && related === null) {
+      setRelatedLoading(true);
+      getRelated(item.city_slug, item.title, item.category)
+        .then((res) => { setRelated(res); setRelatedLoading(false); })
+        .catch(() => { setRelated([]); setRelatedLoading(false); });
+    }
+    setRelatedOpen((prev) => !prev);
   }
 
   return (
@@ -134,6 +152,91 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
           {item.source_name}
         </span>
       </div>
+
+      {/* Row 5: related stories toggle */}
+      <div
+        onClick={handleRelatedToggle}
+        style={{
+          marginTop: 10,
+          paddingTop: 8,
+          borderTop: '1px solid var(--color-border)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: 'var(--color-text-muted)',
+            letterSpacing: '0.3px',
+          }}
+        >
+          Related stories
+        </span>
+        <span style={{ fontSize: 9, color: 'var(--color-text-muted)', lineHeight: 1 }}>
+          {relatedOpen ? '▲' : '▾'}
+        </span>
+      </div>
+
+      {/* Related stories list */}
+      {relatedOpen && (
+        <div style={{ marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
+          {relatedLoading && (
+            <p style={{ fontSize: 10, color: 'var(--color-text-muted)', margin: 0 }}>
+              Loading…
+            </p>
+          )}
+
+          {!relatedLoading && related !== null && related.length === 0 && (
+            <p style={{ fontSize: 10, color: 'var(--color-text-muted)', margin: 0 }}>
+              No related stories found.
+            </p>
+          )}
+
+          {!relatedLoading && related && related.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {related.map((r, i) => (
+                <a
+                  key={i}
+                  href={r.item.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div
+                    style={{
+                      padding: '6px 0',
+                      borderTop: i > 0 ? '1px solid var(--color-border)' : undefined,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--color-text-primary)',
+                        lineHeight: 1.35,
+                      }}
+                    >
+                      {r.item.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: 'var(--color-text-muted)',
+                        marginTop: 2,
+                      }}
+                    >
+                      {r.date} · {r.item.source_name}
+                    </div>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </article>
   );
 }

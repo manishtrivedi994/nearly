@@ -22,6 +22,13 @@ export function getDigest(city: string, date?: string): Promise<DigestResponse> 
   return apiFetch<DigestResponse>(`${BASE}${path}`);
 }
 
+export function getRelated(city: string, title: string, category: string): Promise<SearchResultItem[]> {
+  const params = new URLSearchParams({ title, category });
+  return apiFetch<SearchResultItem[]>(
+    `${BASE}/api/digest/${encodeURIComponent(city)}/related?${params.toString()}`,
+  );
+}
+
 export function getCategoryItems(city: string, category: string): Promise<SearchResultItem[]> {
   return apiFetch<SearchResultItem[]>(
     `${BASE}/api/digest/${encodeURIComponent(city)}/category/${encodeURIComponent(category)}`,
