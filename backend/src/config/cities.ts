@@ -52,6 +52,15 @@ const cities: CityConfig[] = [
       { type: 'rss', url: 'TBD', name: 'Mysuru Today' },
     ],
   },
+  {
+    slug: 'mangaluru',
+    display_name: 'Mangaluru',
+    sources: [
+      { type: 'newsapi', query: 'Mangaluru city news', language: 'en' },
+      { type: 'rss', url: 'TBD', name: 'Daijiworld RSS' },
+      { type: 'rss', url: 'TBD', name: 'Udayavani' },
+    ],
+  },
 ];
 
 export default cities;
