@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import digestRouter from './routes/digest.js';
 import citiesRouter from './routes/cities.js';
 import adminRouter from './routes/admin.js';
@@ -8,6 +9,7 @@ import './db/client.js';
 
 const app = express();
 
+app.use(cors({ origin: process.env.CORS_ORIGIN ?? '*' }));
 app.use(express.json());
 
 app.use('/api/digest', digestRouter);
