@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nearly.app/sitemap.xml
+Sitemap: https://nearly-beta.vercel.app/sitemap.xml

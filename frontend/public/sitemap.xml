@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://nearly.app/</loc>
+    <loc>https://nearly-beta.vercel.app/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://nearly.app/digest/bangalore</loc>
+    <loc>https://nearly-beta.vercel.app/digest/bangalore</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://nearly.app/digest/delhi</loc>
+    <loc>https://nearly-beta.vercel.app/digest/delhi</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://nearly.app/digest/mumbai</loc>
+    <loc>https://nearly-beta.vercel.app/digest/mumbai</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://nearly.app/digest/bangalore/archive</loc>
+    <loc>https://nearly-beta.vercel.app/digest/bangalore/archive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://nearly.app/digest/delhi/archive</loc>
+    <loc>https://nearly-beta.vercel.app/digest/delhi/archive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://nearly.app/digest/mumbai/archive</loc>
+    <loc>https://nearly-beta.vercel.app/digest/mumbai/archive</loc>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
