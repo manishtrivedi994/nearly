@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { getDigest } from '../services/digestService.js';
+import { getDigest, getCategoryItems } from '../services/digestService.js';
+
+const VALID_CATEGORIES = new Set([
+  'civic', 'traffic', 'politics', 'weather', 'business', 'crime', 'culture',
+]);
 
 const router = Router();
 
@@ -28,6 +32,21 @@ router.get('/:citySlug/areas', (req, res) => {
   ].sort();
 
   res.json({ areas });
+});
+
+// GET /api/digest/:citySlug/category/:category
+// Returns last 30 days of DigestItems for that category, newest-first.
+// Must be registered before /:citySlug/:date? so "category" isn't treated as a date.
+router.get('/:citySlug/category/:category', (req, res) => {
+  const { citySlug, category } = req.params;
+
+  if (!VALID_CATEGORIES.has(category)) {
+    res.status(400).json({ error: 'Invalid category' });
+    return;
+  }
+
+  const items = getCategoryItems(citySlug, category);
+  res.json(items);
 });
 
 // GET /api/digest/:citySlug/:date?

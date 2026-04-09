@@ -94,6 +94,38 @@ function sanitizeFtsQuery(q: string): string {
   return tokens.map((t) => `"${t}"*`).join(' ');
 }
 
+// Returns all DigestItems matching a category for a city over the last `days` days,
+// sorted newest-first.
+export function getCategoryItems(
+  citySlug: string,
+  category: string,
+  days = 30,
+): SearchResultItem[] {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+
+  const rows = db
+    .prepare(
+      `SELECT city_slug, digest_date, items_json
+       FROM digests
+       WHERE city_slug = ? AND digest_date >= ?
+       ORDER BY digest_date DESC`,
+    )
+    .all(citySlug, cutoffStr) as DigestRow[];
+
+  const results: SearchResultItem[] = [];
+  for (const row of rows) {
+    const items = JSON.parse(row.items_json) as DigestItem[];
+    for (const item of items) {
+      if (item.category === category) {
+        results.push({ item, date: row.digest_date, city_slug: row.city_slug });
+      }
+    }
+  }
+  return results;
+}
+
 // Full-text search across all digests (or a single city if citySlug is provided).
 // Returns up to 50 matching DigestItems with their date and city.
 export function searchDigests(q: string, citySlug?: string): SearchResultItem[] {

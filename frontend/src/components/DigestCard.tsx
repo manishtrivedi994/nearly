@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { DigestItem } from '../types';
 import type { Bookmark } from '../hooks/useBookmarks';
 import { Badge } from './ui/Badge';
@@ -56,7 +57,13 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
     >
       {/* Row 1: badge + source + bookmark */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Badge category={item.category} />
+        <Link
+          to={`/digest/${item.city_slug}/category/${item.category}`}
+          onClick={(e) => e.stopPropagation()}
+          style={{ textDecoration: 'none' }}
+        >
+          <Badge category={item.category} />
+        </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: 10, color: 'var(--color-text-muted)' }}>
             {item.source_name}

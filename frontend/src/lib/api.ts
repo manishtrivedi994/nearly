@@ -22,6 +22,12 @@ export function getDigest(city: string, date?: string): Promise<DigestResponse> 
   return apiFetch<DigestResponse>(`${BASE}${path}`);
 }
 
+export function getCategoryItems(city: string, category: string): Promise<SearchResultItem[]> {
+  return apiFetch<SearchResultItem[]>(
+    `${BASE}/api/digest/${encodeURIComponent(city)}/category/${encodeURIComponent(category)}`,
+  );
+}
+
 export function searchDigests(q: string, city?: string): Promise<SearchResultItem[]> {
   const params = new URLSearchParams({ q });
   if (city) params.set('city', city);

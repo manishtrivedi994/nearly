@@ -5,6 +5,7 @@ import { DigestDetail } from './pages/DigestDetail';
 import { Archive } from './pages/Archive';
 import { Bookmarks } from './pages/Bookmarks';
 import { Search } from './pages/Search';
+import { CategoryPage } from './pages/CategoryPage';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/bookmarks" element={<Bookmarks />} />
         <Route path="/search" element={<Search />} />
         <Route path="/digest/:citySlug" element={<Digest />} />
+        <Route path="/digest/:citySlug/category/:category" element={<CategoryPage />} />
         <Route path="/digest/:citySlug/archive" element={<Archive />} />
         <Route path="/digest/:citySlug/item/:itemIndex" element={<DigestDetail />} />
         {/* date-specific digest — must come after /archive and /item/:itemIndex */}
