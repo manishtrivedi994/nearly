@@ -3,6 +3,7 @@ import cors from 'cors';
 import digestRouter from './routes/digest.js';
 import citiesRouter from './routes/cities.js';
 import adminRouter from './routes/admin.js';
+import pushRouter from './routes/push.js';
 
 // db/client is imported for its side effect: schema init + city seeding
 import './db/client.js';
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use('/api/digest', digestRouter);
 app.use('/api/cities', citiesRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/push', pushRouter);
 
 // Simple health check — useful for Railway deploy probes
 app.get('/health', (_req, res) => {

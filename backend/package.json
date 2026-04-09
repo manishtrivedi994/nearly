@@ -17,7 +17,8 @@
     "express": "^4.18",
     "node-cron": "^3",
     "openai": "^6.34.0",
-    "rss-parser": "^3"
+    "rss-parser": "^3",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7",
@@ -25,6 +26,7 @@
     "@types/express": "^4",
     "@types/node": "^20",
     "@types/node-cron": "^3",
+    "@types/web-push": "^3.6.4",
     "ts-node": "^10",
     "typescript": "^5"
   }

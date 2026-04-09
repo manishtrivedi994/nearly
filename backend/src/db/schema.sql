@@ -30,5 +30,15 @@ CREATE TABLE IF NOT EXISTS cities (
   sources_json TEXT    NOT NULL          -- JSON array of SourceConfig
 );
 
+-- Web Push subscriptions — one row per (endpoint, city_slug) pair
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  endpoint   TEXT    NOT NULL,
+  keys_json  TEXT    NOT NULL,   -- JSON { p256dh, auth }
+  city_slug  TEXT    NOT NULL,
+  created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(endpoint, city_slug)
+);
+
 CREATE INDEX IF NOT EXISTS idx_raw_items_city_fetched ON raw_items(city_slug, fetched_at);
 CREATE INDEX IF NOT EXISTS idx_digests_city_date ON digests(city_slug, digest_date);

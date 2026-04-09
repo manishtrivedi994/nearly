@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDigest } from '../hooks/useDigest';
 import { useBookmarks } from '../hooks/useBookmarks';
 import { useStreak } from '../hooks/useStreak';
-import { getCities } from '../lib/api';
+import { getCities, subscribePush } from '../lib/api';
 import { DigestCard } from '../components/DigestCard';
 import { Navbar } from '../components/ui/Navbar';
 import { FilterChip } from '../components/ui/FilterChip';
@@ -12,6 +12,18 @@ import type { Category, City } from '../types';
 type Filter = Category | 'all';
 
 const SKELETON_COUNT = 3;
+
+function urlBase64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
+  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+  const raw = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+function bufToBase64(buf: ArrayBuffer): string {
+  return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
 
 function SkeletonCard() {
   return (
@@ -65,6 +77,12 @@ export function Digest() {
   const { isBookmarked, toggle } = useBookmarks();
   const streak = useStreak();
   const [copied, setCopied] = useState(false);
+  const [notifyState, setNotifyState] = useState<'idle' | 'loading' | 'subscribed' | 'denied'>('idle');
+
+  const pushSupported =
+    typeof window !== 'undefined' &&
+    'serviceWorker' in navigator &&
+    'PushManager' in window;
 
   useEffect(() => {
     getCities().then(setCities).catch(() => {});
@@ -81,6 +99,34 @@ export function Digest() {
   }, [citySlug]);
 
   const displayCity = citySlug.charAt(0).toUpperCase() + citySlug.slice(1);
+
+  async function handleNotify() {
+    if (!pushSupported) return;
+    setNotifyState('loading');
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') { setNotifyState('denied'); return; }
+
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      await navigator.serviceWorker.ready;
+
+      const vapidKey = (import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined) ?? '';
+      const appKey = urlBase64ToUint8Array(vapidKey);
+
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appKey });
+      const rawP256 = sub.getKey('p256dh');
+      const rawAuth = sub.getKey('auth');
+      if (!rawP256 || !rawAuth) throw new Error('Missing push keys');
+
+      await subscribePush(
+        { endpoint: sub.endpoint, keys: { p256dh: bufToBase64(rawP256), auth: bufToBase64(rawAuth) } },
+        citySlug,
+      );
+      setNotifyState('subscribed');
+    } catch {
+      setNotifyState('idle');
+    }
+  }
 
   async function handleShare() {
     if (!digest) return;
@@ -168,6 +214,36 @@ export function Digest() {
             </button>
           )}
         </div>
+        {pushSupported && !date && (
+          <div style={{ marginTop: 8 }}>
+            <button
+              onClick={handleNotify}
+              disabled={notifyState === 'loading' || notifyState === 'subscribed'}
+              style={{
+                background: 'none',
+                border: '1px solid var(--color-text-brand-on-dark)',
+                borderRadius: 'var(--radius-pill)',
+                padding: '3px 10px',
+                fontSize: 11,
+                fontWeight: 500,
+                color: notifyState === 'subscribed'
+                  ? 'var(--color-brand-muted)'
+                  : notifyState === 'denied'
+                    ? 'var(--color-text-muted)'
+                    : 'var(--color-text-brand-on-dark)',
+                cursor: notifyState === 'loading' || notifyState === 'subscribed' ? 'default' : 'pointer',
+                transition: 'var(--transition-fast)',
+                fontFamily: 'var(--font-sans)',
+                opacity: notifyState === 'loading' ? 0.6 : 1,
+              }}
+            >
+              {notifyState === 'idle' && 'Notify me'}
+              {notifyState === 'loading' && 'Subscribing…'}
+              {notifyState === 'subscribed' && 'Subscribed'}
+              {notifyState === 'denied' && 'Notifications blocked'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Filter row */}

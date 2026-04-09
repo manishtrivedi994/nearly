@@ -22,6 +22,21 @@ export function getDigest(city: string, date?: string): Promise<DigestResponse> 
   return apiFetch<DigestResponse>(`${BASE}${path}`);
 }
 
+export async function subscribePush(
+  subscription: { endpoint: string; keys: { p256dh: string; auth: string } },
+  citySlug: string,
+): Promise<void> {
+  const res = await fetch(`${BASE}/api/push/subscribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...subscription, citySlug }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+}
+
 export async function triggerRun(password: string, citySlug?: string): Promise<void> {
   const res = await fetch(`${BASE}/api/admin/trigger-run`, {
     method: 'POST',

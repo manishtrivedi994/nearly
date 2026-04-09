@@ -2,6 +2,7 @@ import type { Database } from 'better-sqlite3';
 import type { CityConfig, RawItem, SourceConfig } from '../types.js';
 import { fetchNewsAPI, fetchRSS, deduplicateItems, saveRawItems } from './fetcher.js';
 import { summarizeForCity } from './summarizer.js';
+import { sendPushToCity } from '../services/pushService.js';
 
 interface RawItemRow {
   city_slug: string;
@@ -96,8 +97,9 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
        VALUES (?, ?, ?)`,
     ).run(city.slug, date, JSON.stringify(digestItems));
 
-    // Step 8: Done log
+    // Step 8: Done log + push notifications
     console.log(`[DONE] ${city.slug} — ${digestItems.length} items — ${date}`);
+    await sendPushToCity(city.slug, city.display_name, db);
   } catch (err) {
     console.error(`[ERROR] ${city.slug} ${step}: ${(err as Error).message}`);
   }
