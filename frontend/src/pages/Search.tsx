@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { searchDigests } from '../lib/api';
+import { useMeta } from '../hooks/useMeta';
 import { Navbar } from '../components/ui/Navbar';
 import { Badge } from '../components/ui/Badge';
 import type { SearchResultItem } from '../types';
@@ -61,6 +62,10 @@ export function Search() {
   const [searched, setSearched] = useState(false);
 
   const q = searchParams.get('q') ?? '';
+  useMeta(
+    q ? `"${q}" — Search | nearly.` : 'Search | nearly.',
+    'Search local news stories across all cities on nearly.',
+  );
 
   const runSearch = useCallback((query: string) => {
     const trimmed = query.trim();

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getCities, getPreferences } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
+import { useMeta } from '../hooks/useMeta';
 import type { City } from '../types';
 
 export function Home() {
@@ -9,6 +10,7 @@ export function Home() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { token } = useAuth();
+  useMeta('nearly. — Your city, daily.', 'AI-curated local news digest. Know what\'s happening in your city in 2 minutes — updated every day.');
 
   useEffect(() => {
     async function init() {

@@ -1,0 +1,44 @@
+{
+  "name": "nearly.",
+  "short_name": "nearly.",
+  "description": "AI-curated local news digest. Your city, daily.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0F6E56",
+  "background_color": "#0F6E56",
+  "categories": ["news"],
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/nearly-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/nearly-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Bangalore digest",
+      "url": "/digest/bangalore",
+      "description": "Today in Bangalore"
+    },
+    {
+      "name": "Delhi digest",
+      "url": "/digest/delhi",
+      "description": "Today in Delhi"
+    },
+    {
+      "name": "Mumbai digest",
+      "url": "/digest/mumbai",
+      "description": "Today in Mumbai"
+    }
+  ]
+}

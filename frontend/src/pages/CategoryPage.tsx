@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCategoryItems } from '../lib/api';
+import { useMeta } from '../hooks/useMeta';
 import { Navbar } from '../components/ui/Navbar';
 import { Badge } from '../components/ui/Badge';
 import type { Category, SearchResultItem } from '../types';
@@ -28,6 +29,11 @@ export function CategoryPage() {
   const [items, setItems] = useState<SearchResultItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const displayCity = citySlug.charAt(0).toUpperCase() + citySlug.slice(1);
+  useMeta(
+    `${category.charAt(0).toUpperCase() + category.slice(1)} in ${displayCity} | nearly.`,
+    `Last 30 days of ${category} news in ${displayCity}, curated by AI.`,
+  );
 
   useEffect(() => {
     if (!citySlug || !VALID_CATEGORIES.has(category)) return;
@@ -45,7 +51,6 @@ export function CategoryPage() {
   }, [citySlug, category]);
 
   const grouped = groupByDate(items);
-  const displayCity = citySlug.charAt(0).toUpperCase() + citySlug.slice(1);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--color-bg-secondary)' }}>

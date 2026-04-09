@@ -4,6 +4,7 @@ import { useDigest } from '../hooks/useDigest';
 import { useBookmarks } from '../hooks/useBookmarks';
 import { useStreak } from '../hooks/useStreak';
 import { useAuth } from '../hooks/useAuth';
+import { useMeta } from '../hooks/useMeta';
 import { getCities, subscribePush, patchPreferences } from '../lib/api';
 import { DigestCard } from '../components/DigestCard';
 import { Navbar } from '../components/ui/Navbar';
@@ -107,6 +108,10 @@ export function Digest() {
   }, [citySlug]);
 
   const displayCity = citySlug.charAt(0).toUpperCase() + citySlug.slice(1);
+  useMeta(
+    `${date ? 'Past digest' : 'Today'} in ${displayCity} | nearly.`,
+    `AI-curated local news digest for ${displayCity}. ${digest ? `${digest.items.length} stories` : 'Updated daily'} — read in 2 minutes.`,
+  );
 
   async function handleNotify() {
     if (!pushSupported) return;
