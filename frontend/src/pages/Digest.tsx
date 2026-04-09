@@ -64,6 +64,7 @@ export function Digest() {
   const navigate = useNavigate();
   const { isBookmarked, toggle } = useBookmarks();
   const streak = useStreak();
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     getCities().then(setCities).catch(() => {});
@@ -80,6 +81,23 @@ export function Digest() {
   }, [citySlug]);
 
   const displayCity = citySlug.charAt(0).toUpperCase() + citySlug.slice(1);
+
+  async function handleShare() {
+    if (!digest) return;
+    const lines = digest.items
+      .slice(0, 5)
+      .map((item, i) => `${i + 1}. ${item.title}`)
+      .join('\n');
+    const text = `Today in ${displayCity} via nearly.\n\n${lines}\n\nnearly.app/digest/${citySlug}`;
+
+    if (navigator.share) {
+      try { await navigator.share({ text }); } catch { /* cancelled */ }
+      return;
+    }
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   const items =
     filter === 'all'
@@ -125,8 +143,30 @@ export function Digest() {
         >
           {date ? 'Past digest' : 'Today in your city'}
         </div>
-        <div style={{ fontSize: 12, color: 'var(--color-brand-muted)', marginTop: 4 }}>
-          {digest ? `${digest.items.length} stories · 2 min read` : '\u00a0'}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
+          <span style={{ fontSize: 12, color: 'var(--color-brand-muted)' }}>
+            {digest ? `${digest.items.length} stories · 2 min read` : '\u00a0'}
+          </span>
+          {digest && digest.items.length > 0 && (
+            <button
+              onClick={handleShare}
+              style={{
+                background: 'none',
+                border: '1px solid var(--color-text-brand-on-dark)',
+                borderRadius: 'var(--radius-pill)',
+                padding: '3px 10px',
+                fontSize: 11,
+                fontWeight: 500,
+                color: copied ? 'var(--color-brand-muted)' : 'var(--color-text-brand-on-dark)',
+                cursor: 'pointer',
+                transition: 'var(--transition-fast)',
+                fontFamily: 'var(--font-sans)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {copied ? 'Copied!' : 'Share digest'}
+            </button>
+          )}
         </div>
       </div>
 
