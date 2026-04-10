@@ -54,6 +54,7 @@ export function Navbar({
 
   return (
     <nav
+      className="nav-shell"
       style={{
         background: 'var(--color-bg-primary)',
         borderBottom: '1px solid var(--color-border)',
@@ -96,7 +97,7 @@ export function Navbar({
         )}
       </div>
 
-      {/* Right: search input (expanded) or controls */}
+      {/* Right: search input (expanded) or primary controls */}
       {!showBack && (
         searchOpen ? (
           <form
@@ -141,23 +142,6 @@ export function Navbar({
           </form>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {streak >= 2 && (
-              <span
-                className="nav-hide-mobile"
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: '#B85000',
-                  background: '#FFF0E0',
-                  padding: '3px 8px',
-                  borderRadius: 'var(--radius-pill)',
-                  letterSpacing: '0.3px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                🔥 {streak} days
-              </span>
-            )}
             <button
               onClick={() => setSearchOpen(true)}
               aria-label="Search"
@@ -173,32 +157,6 @@ export function Navbar({
             >
               <SearchIcon />
             </button>
-            <Link
-              to="/bookmarks"
-              className="nav-hide-mobile"
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                color: 'var(--color-text-muted)',
-                letterSpacing: '0.3px',
-              }}
-            >
-              Bookmarks
-            </Link>
-            {archiveHref && (
-              <Link
-                to={archiveHref}
-                className="nav-hide-mobile"
-                style={{
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: 'var(--color-text-muted)',
-                  letterSpacing: '0.3px',
-                }}
-              >
-                Archive
-              </Link>
-            )}
             {city && cities && onCitySelect && (
               <CityDropdown
                 currentCity={city}
@@ -207,21 +165,16 @@ export function Navbar({
               />
             )}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span className="nav-hide-mobile" style={{ fontSize: 11, color: 'var(--color-text-muted)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {user.email}
-                </span>
-                <button
-                  onClick={logout}
-                  style={{
-                    background: 'none', border: '1px solid var(--color-border)',
-                    borderRadius: 6, cursor: 'pointer', fontSize: 11,
-                    color: 'var(--color-text-muted)', padding: '3px 8px',
-                  }}
-                >
-                  Sign out
-                </button>
-              </div>
+              <button
+                onClick={logout}
+                style={{
+                  background: 'none', border: '1px solid var(--color-border)',
+                  borderRadius: 6, cursor: 'pointer', fontSize: 11,
+                  color: 'var(--color-text-muted)', padding: '3px 8px',
+                }}
+              >
+                Sign out
+              </button>
             ) : (
               <button
                 onClick={() => setAuthOpen(true)}
@@ -237,6 +190,58 @@ export function Navbar({
           </div>
         )
       )}
+
+      {/* Secondary row: streak + bookmarks + archive + email (wraps to full width on mobile) */}
+      {!showBack && !searchOpen && (
+        <div className="nav-secondary" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {streak >= 2 && (
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                color: '#B85000',
+                background: '#FFF0E0',
+                padding: '3px 8px',
+                borderRadius: 'var(--radius-pill)',
+                letterSpacing: '0.3px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              🔥 {streak} days
+            </span>
+          )}
+          <Link
+            to="/bookmarks"
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              color: 'var(--color-text-muted)',
+              letterSpacing: '0.3px',
+            }}
+          >
+            Bookmarks
+          </Link>
+          {archiveHref && (
+            <Link
+              to={archiveHref}
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: 'var(--color-text-muted)',
+                letterSpacing: '0.3px',
+              }}
+            >
+              Archive
+            </Link>
+          )}
+          {user && (
+            <span style={{ fontSize: 11, color: 'var(--color-text-muted)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user.email}
+            </span>
+          )}
+        </div>
+      )}
+
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
     </nav>
   );
