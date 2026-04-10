@@ -85,7 +85,7 @@ export function useBookmarks() {
             source_name: bookmark.source_name,
             category: bookmark.category,
           })
-            .then((saved) => setBookmarks((prev) => [...prev, apiToBookmark(saved)]))
+            .then((saved) => { if (saved) setBookmarks((prev) => [...prev, apiToBookmark(saved)]); })
             .catch(() => {});
         }
       } else {

@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback, type ReactNode, createElement } from 'react';
-import { getPreferences, patchPreferences, addBookmark, postReadDate } from '../lib/api';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode, createElement } from 'react';
+import { getPreferences, patchPreferences, addBookmark, postReadDate, registerStaleTokenHandler, clearStaleTokenHandler } from '../lib/api';
 
 const STORAGE_KEY = 'nearly_token';
 
@@ -110,6 +110,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? decodeToken(stored) : null;
   });
+
+  // Register logout as the stale-token handler so any 401 from /api/me/* auto-signs out
+  useEffect(() => {
+    registerStaleTokenHandler(() => {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem('nearly_bookmarks');
+      localStorage.removeItem('nearly_read_dates');
+      localStorage.removeItem('nearly_last_city');
+      setToken(null);
+      setUser(null);
+    });
+    return () => clearStaleTokenHandler();
+  }, []);
 
   const login = useCallback((newToken: string) => {
     const decoded = decodeToken(newToken);

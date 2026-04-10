@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import type { Response } from 'express';
 import db from '../db/client.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import type { AuthedRequest } from '../middleware/authMiddleware.js';
@@ -7,6 +8,16 @@ const router = Router();
 
 // All routes require auth
 router.use(authMiddleware);
+
+// Returns true if the user row exists in the DB.
+// A valid JWT can still reference a deleted/missing user (e.g. after a DB reset).
+function userExists(userId: number): boolean {
+  return !!db.prepare('SELECT 1 FROM users WHERE id = ?').get(userId);
+}
+
+function staleToken(res: Response): void {
+  res.status(401).json({ error: 'User not found — please sign in again' });
+}
 
 // ─── Bookmarks ────────────────────────────────────────────────────────────────
 
@@ -24,6 +35,7 @@ interface BookmarkRow {
 
 // GET /api/me/bookmarks
 router.get('/bookmarks', (req: AuthedRequest, res) => {
+  if (!userExists(req.user!.id)) { staleToken(res); return; }
   const rows = db
     .prepare('SELECT * FROM user_bookmarks WHERE user_id = ? ORDER BY saved_at DESC')
     .all(req.user!.id) as BookmarkRow[];
@@ -32,6 +44,8 @@ router.get('/bookmarks', (req: AuthedRequest, res) => {
 
 // POST /api/me/bookmarks
 router.post('/bookmarks', (req: AuthedRequest, res) => {
+  if (!userExists(req.user!.id)) { staleToken(res); return; }
+
   const { title, summary, source_url, city_slug, digest_date, source_name, category } =
     req.body as Record<string, unknown>;
 
@@ -93,6 +107,7 @@ interface ReadDateRow {
 
 // GET /api/me/read-dates
 router.get('/read-dates', (req: AuthedRequest, res) => {
+  if (!userExists(req.user!.id)) { staleToken(res); return; }
   const rows = db
     .prepare('SELECT id, read_date, city_slug FROM user_read_dates WHERE user_id = ? ORDER BY read_date DESC')
     .all(req.user!.id) as ReadDateRow[];
@@ -101,6 +116,8 @@ router.get('/read-dates', (req: AuthedRequest, res) => {
 
 // POST /api/me/read-dates
 router.post('/read-dates', (req: AuthedRequest, res) => {
+  if (!userExists(req.user!.id)) { staleToken(res); return; }
+
   const { read_date, city_slug } = req.body as Record<string, unknown>;
 
   if (typeof read_date !== 'string' || typeof city_slug !== 'string') {
@@ -124,6 +141,7 @@ interface PrefRow {
 
 // GET /api/me/preferences
 router.get('/preferences', (req: AuthedRequest, res) => {
+  if (!userExists(req.user!.id)) { staleToken(res); return; }
   const row = db
     .prepare('SELECT last_city, language FROM user_preferences WHERE user_id = ?')
     .get(req.user!.id) as PrefRow | undefined;
@@ -132,6 +150,8 @@ router.get('/preferences', (req: AuthedRequest, res) => {
 
 // PATCH /api/me/preferences
 router.patch('/preferences', (req: AuthedRequest, res) => {
+  if (!userExists(req.user!.id)) { staleToken(res); return; }
+
   const { last_city, language } = req.body as Record<string, unknown>;
 
   const existing = db

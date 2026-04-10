@@ -2,8 +2,26 @@ import type { City, DigestResponse, SearchResultItem } from '../types';
 
 const BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
 
+// Hooks register a logout callback here so stale-token 401s auto-sign-out the user.
+let _onStaleToken: (() => void) | null = null;
+export function registerStaleTokenHandler(fn: () => void) { _onStaleToken = fn; }
+export function clearStaleTokenHandler() { _onStaleToken = null; }
+
+function handleStaleToken() { _onStaleToken?.(); }
+
 async function apiFetch<T>(url: string): Promise<T> {
   const res = await fetch(url);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+// Wraps a fetch against /api/me/* — calls logout on 401 (stale JWT)
+export async function meFetch<T>(url: string, init?: RequestInit): Promise<T | null> {
+  const res = await fetch(url, init);
+  if (res.status === 401) { handleStaleToken(); return null; }
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: string };
     throw new Error(body.error ?? `HTTP ${res.status}`);
@@ -98,43 +116,34 @@ export interface ApiPreferences {
 }
 
 export async function getBookmarks(token: string): Promise<ApiBookmark[]> {
-  const res = await fetch(`${BASE}/api/me/bookmarks`, { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) return [];
-  return res.json() as Promise<ApiBookmark[]>;
+  return await meFetch<ApiBookmark[]>(`${BASE}/api/me/bookmarks`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }) ?? [];
 }
 
-export async function addBookmark(token: string, data: Omit<ApiBookmark, 'id' | 'saved_at'>): Promise<ApiBookmark> {
-  const res = await fetch(`${BASE}/api/me/bookmarks`, {
+export async function addBookmark(token: string, data: Omit<ApiBookmark, 'id' | 'saved_at'>): Promise<ApiBookmark | null> {
+  return meFetch<ApiBookmark>(`${BASE}/api/me/bookmarks`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify(data),
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { error?: string };
-    throw new Error(body.error ?? `HTTP ${res.status}`);
-  }
-  return res.json() as Promise<ApiBookmark>;
 }
 
 export async function removeBookmark(token: string, id: number): Promise<void> {
-  const res = await fetch(`${BASE}/api/me/bookmarks/${id}`, {
+  await meFetch<unknown>(`${BASE}/api/me/bookmarks/${id}`, {
     method: 'DELETE',
     headers: authHeaders(token),
   });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({})) as { error?: string };
-    throw new Error(body.error ?? `HTTP ${res.status}`);
-  }
 }
 
 export async function getReadDates(token: string): Promise<{ id: number; read_date: string; city_slug: string }[]> {
-  const res = await fetch(`${BASE}/api/me/read-dates`, { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) return [];
-  return res.json() as Promise<{ id: number; read_date: string; city_slug: string }[]>;
+  return await meFetch<{ id: number; read_date: string; city_slug: string }[]>(
+    `${BASE}/api/me/read-dates`, { headers: { Authorization: `Bearer ${token}` } },
+  ) ?? [];
 }
 
 export async function postReadDate(token: string, read_date: string, city_slug: string): Promise<void> {
-  await fetch(`${BASE}/api/me/read-dates`, {
+  await meFetch<unknown>(`${BASE}/api/me/read-dates`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({ read_date, city_slug }),
@@ -142,13 +151,13 @@ export async function postReadDate(token: string, read_date: string, city_slug: 
 }
 
 export async function getPreferences(token: string): Promise<ApiPreferences> {
-  const res = await fetch(`${BASE}/api/me/preferences`, { headers: { Authorization: `Bearer ${token}` } });
-  if (!res.ok) return { last_city: null, language: 'en' };
-  return res.json() as Promise<ApiPreferences>;
+  return await meFetch<ApiPreferences>(`${BASE}/api/me/preferences`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }) ?? { last_city: null, language: 'en' };
 }
 
 export async function patchPreferences(token: string, data: Partial<ApiPreferences>): Promise<void> {
-  await fetch(`${BASE}/api/me/preferences`, {
+  await meFetch<unknown>(`${BASE}/api/me/preferences`, {
     method: 'PATCH',
     headers: authHeaders(token),
     body: JSON.stringify(data),

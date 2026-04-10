@@ -12,6 +12,8 @@ const db = new Database(DB_PATH);
 
 // Enable WAL mode for better concurrent read performance
 db.pragma('journal_mode = WAL');
+// Enforce foreign key constraints (SQLite has them off by default)
+db.pragma('foreign_keys = ON');
 
 // Run schema DDL — all statements are IF NOT EXISTS so this is safe on every start
 const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
