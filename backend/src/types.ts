@@ -23,7 +23,12 @@ export interface RssSourceConfig {
   name: string;
 }
 
-export type SourceConfig = NewsApiSourceConfig | RssSourceConfig;
+export interface GuardianSourceConfig {
+  type: 'guardian';
+  query: string;  // city name, e.g. "Bangalore"
+}
+
+export type SourceConfig = NewsApiSourceConfig | RssSourceConfig | GuardianSourceConfig;
 
 export interface CityConfig {
   slug: string;

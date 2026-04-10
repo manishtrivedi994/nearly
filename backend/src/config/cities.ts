@@ -8,6 +8,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Bangalore city news', language: 'en' },
+      { type: 'guardian', query: 'Bangalore India' },
       { type: 'rss', url: 'https://www.thehindu.com/news/cities/bangalore/feeder/default.rss', name: 'The Hindu Blr' },
     ],
   },
@@ -17,6 +18,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Delhi city news', language: 'en' },
+      { type: 'guardian', query: 'Delhi India' },
       { type: 'rss', url: 'https://timesofindia.indiatimes.com/rssfeeds/2647163.cms', name: 'TOI Delhi' },
     ],
   },
@@ -26,6 +28,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Mumbai city news', language: 'en' },
+      { type: 'guardian', query: 'Mumbai India' },
       { type: 'rss', url: 'https://www.mid-day.com/rss/news', name: 'Mid-Day' },
     ],
   },
@@ -35,6 +38,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Chennai city news', language: 'en' },
+      { type: 'guardian', query: 'Chennai India' },
       { type: 'rss', url: '', name: 'Chennai Local News' },
     ],
   },
@@ -44,11 +48,12 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Hyderabad city news', language: 'en' },
+      { type: 'guardian', query: 'Hyderabad India' },
       { type: 'rss', url: '', name: 'Hyderabad Local News' },
     ],
   },
 
-  // ─── Original cities (tier 3) ──────────────────────────────────────────────
+  // ─── Original cities (tier 3 — NewsAPI only) ──────────────────────────────
   {
     slug: 'mysuru',
     display_name: 'Mysuru',
@@ -81,6 +86,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Coimbatore city news', language: 'en' },
+      { type: 'guardian', query: 'Coimbatore India' },
       { type: 'rss', url: '', name: 'Coimbatore Local News' },
     ],
   },
@@ -90,6 +96,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Kochi city news', language: 'en' },
+      { type: 'guardian', query: 'Kochi India' },
       { type: 'rss', url: '', name: 'Kochi Local News' },
     ],
   },
@@ -99,6 +106,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Thiruvananthapuram city news', language: 'en' },
+      { type: 'guardian', query: 'Thiruvananthapuram India' },
       { type: 'rss', url: '', name: 'Thiruvananthapuram Local News' },
     ],
   },
@@ -108,6 +116,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Visakhapatnam city news', language: 'en' },
+      { type: 'guardian', query: 'Visakhapatnam India' },
       { type: 'rss', url: '', name: 'Visakhapatnam Local News' },
     ],
   },
@@ -135,6 +144,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Pune city news', language: 'en' },
+      { type: 'guardian', query: 'Pune India' },
       { type: 'rss', url: '', name: 'Pune Local News' },
     ],
   },
@@ -144,6 +154,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Ahmedabad city news', language: 'en' },
+      { type: 'guardian', query: 'Ahmedabad India' },
       { type: 'rss', url: '', name: 'Ahmedabad Local News' },
     ],
   },
@@ -153,6 +164,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Surat city news', language: 'en' },
+      { type: 'guardian', query: 'Surat India' },
       { type: 'rss', url: '', name: 'Surat Local News' },
     ],
   },
@@ -162,6 +174,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Nagpur city news', language: 'en' },
+      { type: 'guardian', query: 'Nagpur India' },
       { type: 'rss', url: '', name: 'Nagpur Local News' },
     ],
   },
@@ -171,6 +184,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Nashik city news', language: 'en' },
+      { type: 'guardian', query: 'Nashik India' },
       { type: 'rss', url: '', name: 'Nashik Local News' },
     ],
   },
@@ -180,6 +194,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Vadodara city news', language: 'en' },
+      { type: 'guardian', query: 'Vadodara India' },
       { type: 'rss', url: '', name: 'Vadodara Local News' },
     ],
   },
@@ -207,6 +222,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Lucknow city news', language: 'en' },
+      { type: 'guardian', query: 'Lucknow India' },
       { type: 'rss', url: '', name: 'Lucknow Local News' },
     ],
   },
@@ -216,6 +232,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Jaipur city news', language: 'en' },
+      { type: 'guardian', query: 'Jaipur India' },
       { type: 'rss', url: '', name: 'Jaipur Local News' },
     ],
   },
@@ -225,6 +242,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Kanpur city news', language: 'en' },
+      { type: 'guardian', query: 'Kanpur India' },
       { type: 'rss', url: '', name: 'Kanpur Local News' },
     ],
   },
@@ -234,6 +252,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Varanasi city news', language: 'en' },
+      { type: 'guardian', query: 'Varanasi India' },
       { type: 'rss', url: '', name: 'Varanasi Local News' },
     ],
   },
@@ -243,6 +262,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Agra city news', language: 'en' },
+      { type: 'guardian', query: 'Agra India' },
       { type: 'rss', url: '', name: 'Agra Local News' },
     ],
   },
@@ -252,6 +272,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Chandigarh city news', language: 'en' },
+      { type: 'guardian', query: 'Chandigarh India' },
       { type: 'rss', url: '', name: 'Chandigarh Local News' },
     ],
   },
@@ -279,6 +300,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Kolkata city news', language: 'en' },
+      { type: 'guardian', query: 'Kolkata India' },
       { type: 'rss', url: '', name: 'Kolkata Local News' },
     ],
   },
@@ -288,6 +310,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Bhubaneswar city news', language: 'en' },
+      { type: 'guardian', query: 'Bhubaneswar India' },
       { type: 'rss', url: '', name: 'Bhubaneswar Local News' },
     ],
   },
@@ -297,6 +320,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Patna city news', language: 'en' },
+      { type: 'guardian', query: 'Patna India' },
       { type: 'rss', url: '', name: 'Patna Local News' },
     ],
   },
@@ -306,6 +330,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Ranchi city news', language: 'en' },
+      { type: 'guardian', query: 'Ranchi India' },
       { type: 'rss', url: '', name: 'Ranchi Local News' },
     ],
   },
@@ -315,6 +340,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Guwahati city news', language: 'en' },
+      { type: 'guardian', query: 'Guwahati India' },
       { type: 'rss', url: '', name: 'Guwahati Local News' },
     ],
   },
@@ -326,6 +352,7 @@ const cities: CityConfig[] = [
     tier: 1,
     sources: [
       { type: 'newsapi', query: 'Indore city news', language: 'en' },
+      { type: 'guardian', query: 'Indore India' },
       { type: 'rss', url: '', name: 'Indore Local News' },
     ],
   },
@@ -335,6 +362,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Bhopal city news', language: 'en' },
+      { type: 'guardian', query: 'Bhopal India' },
       { type: 'rss', url: '', name: 'Bhopal Local News' },
     ],
   },
@@ -344,6 +372,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Raipur city news', language: 'en' },
+      { type: 'guardian', query: 'Raipur India' },
       { type: 'rss', url: '', name: 'Raipur Local News' },
     ],
   },
@@ -363,6 +392,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Noida city news', language: 'en' },
+      { type: 'guardian', query: 'Noida India' },
       { type: 'rss', url: '', name: 'Noida Local News' },
     ],
   },
@@ -372,6 +402,7 @@ const cities: CityConfig[] = [
     tier: 2,
     sources: [
       { type: 'newsapi', query: 'Gurgaon city news', language: 'en' },
+      { type: 'guardian', query: 'Gurgaon India' },
       { type: 'rss', url: '', name: 'Gurgaon Local News' },
     ],
   },

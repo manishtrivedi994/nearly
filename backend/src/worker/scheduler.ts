@@ -1,6 +1,6 @@
 import type { Database } from 'better-sqlite3';
 import type { CityConfig, RawItem } from '../types.js';
-import { fetchNewsAPI, fetchRSS, deduplicateItems, saveRawItems } from './fetcher.js';
+import { fetchNewsAPI, fetchRSS, fetchGuardian, deduplicateItems, saveRawItems } from './fetcher.js';
 import { summarizeForCity } from './summarizer.js';
 import { upsertDigest } from '../services/digestService.js';
 import { sendPushToCity } from '../services/pushService.js';
@@ -26,6 +26,16 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
   let step = '';
 
   try {
+    // Early exit if digest already exists for today — avoids burning API quota
+    const date = todayIST();
+    const existing = db
+      .prepare('SELECT 1 FROM digests WHERE city_slug = ? AND digest_date = ?')
+      .get(city.slug, date);
+    if (existing) {
+      console.log(`[INFO] ${city.slug} — digest already exists for ${date}, skipping`);
+      return;
+    }
+
     // Step 2: Fetch raw items from all sources
     step = 'fetch-newsapi';
     const newsItems = await fetchNewsAPI(city);
@@ -40,7 +50,16 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
       }
     }
 
-    const fetched = [...newsItems, ...rssItems];
+    step = 'fetch-guardian';
+    const guardianItems: RawItem[] = [];
+    for (const source of city.sources) {
+      if (source.type === 'guardian') {
+        const items = await fetchGuardian(source, city.slug);
+        guardianItems.push(...items);
+      }
+    }
+
+    const fetched = [...newsItems, ...rssItems, ...guardianItems];
 
     // Step 3: Deduplicate against existing hashes (last 24h)
     step = 'deduplicate';
@@ -75,16 +94,8 @@ export async function runPipelineForCity(city: CityConfig, db: Database): Promis
       return;
     }
 
-    // Step 6: Summarize via Groq — skip if digest already exists for today
+    // Step 6: Summarize via Groq
     step = 'summarize';
-    const date = todayIST();
-    const existing = db
-      .prepare('SELECT 1 FROM digests WHERE city_slug = ? AND digest_date = ?')
-      .get(city.slug, date);
-    if (existing) {
-      console.log(`[INFO] ${city.slug} — digest already exists for ${date}, skipping Groq call`);
-      return;
-    }
     const digestItems = await summarizeForCity(recentItems, city);
 
     if (digestItems.length === 0) {

@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import axios from 'axios';
 import Parser from 'rss-parser';
 import type { Database } from 'better-sqlite3';
-import type { CityConfig, RssSourceConfig, RawItem } from '../types.js';
+import type { CityConfig, RssSourceConfig, GuardianSourceConfig, RawItem } from '../types.js';
 
 const rssParser = new Parser();
 
@@ -123,6 +123,51 @@ export function saveRawItems(items: RawItem[], db: Database): void {
   insertAll(items);
 }
 
+// Fetches articles from The Guardian API for a city.
+// Stored with source_type 'newsapi' to satisfy the existing DB CHECK constraint.
+export async function fetchGuardian(source: GuardianSourceConfig, citySlug: string): Promise<RawItem[]> {
+  const apiKey = process.env.GUARDIAN_API_KEY;
+  if (!apiKey) {
+    console.warn(`[WARN] GUARDIAN_API_KEY not set — skipping Guardian fetch for ${citySlug}`);
+    return [];
+  }
+
+  const items: RawItem[] = [];
+
+  try {
+    const response = await axios.get<{ response: { results: GuardianArticle[] } }>(
+      'https://content.guardianapis.com/search',
+      {
+        params: {
+          q: source.query,
+          'api-key': apiKey,
+          'show-fields': 'trailText',
+          'page-size': 20,
+          'order-by': 'newest',
+        },
+        timeout: 10_000,
+      },
+    );
+
+    for (const article of response.data.response?.results ?? []) {
+      if (!article.webTitle) continue;
+      items.push({
+        city_slug: citySlug,
+        source_type: 'newsapi',          // stored as 'newsapi' to avoid DB CHECK constraint
+        source_name: 'The Guardian',
+        title: article.webTitle,
+        url: article.webUrl ?? null,
+        raw_text: article.fields?.trailText ?? null,
+        content_hash: sha256(article.webTitle + 'The Guardian'),
+      });
+    }
+  } catch (err) {
+    console.error(`[ERROR] fetchGuardian ${citySlug} "${source.query}":`, (err as Error).message);
+  }
+
+  return items;
+}
+
 // Internal type for NewsAPI response articles
 interface NewsApiArticle {
   source?: { name?: string };
@@ -130,4 +175,10 @@ interface NewsApiArticle {
   description?: string;
   content?: string;
   url?: string;
+}
+
+interface GuardianArticle {
+  webTitle?: string;
+  webUrl?: string;
+  fields?: { trailText?: string };
 }
