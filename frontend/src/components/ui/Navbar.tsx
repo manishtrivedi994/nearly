@@ -143,6 +143,7 @@ export function Navbar({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {streak >= 2 && (
               <span
+                className="nav-hide-mobile"
                 style={{
                   fontSize: 10,
                   fontWeight: 700,
@@ -174,6 +175,7 @@ export function Navbar({
             </button>
             <Link
               to="/bookmarks"
+              className="nav-hide-mobile"
               style={{
                 fontSize: 11,
                 fontWeight: 500,
@@ -186,6 +188,7 @@ export function Navbar({
             {archiveHref && (
               <Link
                 to={archiveHref}
+                className="nav-hide-mobile"
                 style={{
                   fontSize: 11,
                   fontWeight: 500,
@@ -205,7 +208,7 @@ export function Navbar({
             )}
             {user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 11, color: 'var(--color-text-muted)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span className="nav-hide-mobile" style={{ fontSize: 11, color: 'var(--color-text-muted)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {user.email}
                 </span>
                 <button
