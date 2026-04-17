@@ -4,6 +4,7 @@ import { getCities, getPreferences } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { useMeta } from '../hooks/useMeta';
 import type { City } from '../types';
+import { trackEvent } from '../utils/analytics';
 
 export function Home() {
   const [cities, setCities] = useState<City[]>([]);
@@ -95,7 +96,10 @@ export function Home() {
             <CityCard
               key={city.slug}
               city={city}
-              onClick={() => navigate(`/digest/${city.slug}`)}
+              onClick={() => {
+                trackEvent('city_selected', { city: city.slug });
+                navigate(`/digest/${city.slug}`);
+              }}
             />
           ))}
         </div>

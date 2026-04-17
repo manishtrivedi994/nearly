@@ -5,6 +5,7 @@ import type { Bookmark } from '../hooks/useBookmarks';
 import type { SearchResultItem } from '../types';
 import { Badge } from './ui/Badge';
 import { getRelated, postFlag } from '../lib/api';
+import { trackEvent } from '../utils/analytics';
 
 interface DigestCardProps {
   item: DigestItem;
@@ -48,6 +49,11 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
 
   function handleBookmark(e: React.MouseEvent) {
     e.stopPropagation();
+    trackEvent(isBookmarked ? 'article_unbookmarked' : 'article_bookmarked', {
+      city: item.city_slug,
+      category: item.category,
+      title: item.title,
+    });
     onBookmark?.({
       title: item.title,
       summary: item.summary,
@@ -61,11 +67,14 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
 
   function handleRelatedToggle(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!relatedOpen && related === null) {
-      setRelatedLoading(true);
-      getRelated(item.city_slug, item.title, item.category)
-        .then((res) => { setRelated(res); setRelatedLoading(false); })
-        .catch(() => { setRelated([]); setRelatedLoading(false); });
+    if (!relatedOpen) {
+      trackEvent('related_stories_opened', { city: item.city_slug, category: item.category, title: item.title });
+      if (related === null) {
+        setRelatedLoading(true);
+        getRelated(item.city_slug, item.title, item.category)
+          .then((res) => { setRelated(res); setRelatedLoading(false); })
+          .catch(() => { setRelated([]); setRelatedLoading(false); });
+      }
     }
     setRelatedOpen((prev) => !prev);
   }
@@ -92,6 +101,7 @@ export function DigestCard({ item, onClick, date, isBookmarked = false, onBookma
     })
       .then(() => {
         setFlagState('done');
+        trackEvent('article_flagged', { city: item.city_slug, reason: flagReason, title: item.title });
         setTimeout(() => setFlagOpen(false), 1500);
       })
       .catch(() => setFlagState('idle'));

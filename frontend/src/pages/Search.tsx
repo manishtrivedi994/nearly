@@ -5,6 +5,7 @@ import { useMeta } from '../hooks/useMeta';
 import { Navbar } from '../components/ui/Navbar';
 import { Badge } from '../components/ui/Badge';
 import type { SearchResultItem } from '../types';
+import { trackEvent } from '../utils/analytics';
 
 // Wraps matching tokens in <mark> elements for highlighting.
 function highlight(text: string, query: string): React.ReactNode {
@@ -99,6 +100,7 @@ export function Search() {
     e.preventDefault();
     const trimmed = inputValue.trim();
     if (!trimmed) return;
+    trackEvent('search_performed', { query: trimmed });
     setSearchParams({ q: trimmed });
   }
 
@@ -225,6 +227,7 @@ function SearchCard({ result, query }: SearchCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       style={{ textDecoration: 'none' }}
+      onClick={() => trackEvent('search_result_clicked', { city: result.city_slug, category: item.category, title: item.title, query })}
     >
       <article
         onMouseEnter={(e) => {

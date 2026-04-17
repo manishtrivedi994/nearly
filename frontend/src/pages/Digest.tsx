@@ -10,6 +10,7 @@ import { DigestCard } from '../components/DigestCard';
 import { Navbar } from '../components/ui/Navbar';
 import { FilterChip } from '../components/ui/FilterChip';
 import type { Category, City } from '../types';
+import { trackEvent } from '../utils/analytics';
 
 type Filter = Category | 'all';
 
@@ -136,6 +137,7 @@ export function Digest() {
         citySlug,
       );
       setNotifyState('subscribed');
+      trackEvent('push_notification_subscribed', { city: citySlug });
     } catch {
       setNotifyState('idle');
     }
@@ -150,10 +152,14 @@ export function Digest() {
     const text = `Today in ${displayCity} via nearly.\n\n${lines}\n\nnearly.app/digest/${citySlug}`;
 
     if (navigator.share) {
-      try { await navigator.share({ text }); } catch { /* cancelled */ }
+      try {
+        await navigator.share({ text });
+        trackEvent('digest_shared', { city: citySlug, method: 'native' });
+      } catch { /* cancelled */ }
       return;
     }
     await navigator.clipboard.writeText(text);
+    trackEvent('digest_shared', { city: citySlug, method: 'clipboard' });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -286,7 +292,10 @@ export function Digest() {
             key={cat}
             label={cat.charAt(0).toUpperCase() + cat.slice(1)}
             active={filter === cat}
-            onClick={() => setFilter(cat)}
+            onClick={() => {
+              setFilter(cat);
+              trackEvent('category_filter_applied', { city: citySlug, category: cat });
+            }}
           />
         ))}
       </div>
@@ -310,7 +319,10 @@ export function Digest() {
               key={area}
               label={area}
               active={areaFilter === area}
-              onClick={() => setAreaFilter(area)}
+              onClick={() => {
+                setAreaFilter(area);
+                trackEvent('area_filter_applied', { city: citySlug, area });
+              }}
             />
           ))}
         </div>
@@ -354,11 +366,12 @@ export function Digest() {
               date={digest?.date}
               isBookmarked={isBookmarked(item.source_url)}
               onBookmark={toggle}
-              onClick={() =>
+              onClick={() => {
+                trackEvent('article_opened', { city: citySlug, category: item.category, title: item.title });
                 navigate(`/digest/${citySlug}/item/${i}`, {
                   state: { item, items: digest?.items ?? [], date: digest?.date },
-                })
-              }
+                });
+              }}
             />
           ))}
 
@@ -374,7 +387,12 @@ export function Digest() {
             }}
           >
             <button
-              onClick={() => setSourcesOpen((v) => !v)}
+              onClick={() => {
+                setSourcesOpen((v) => {
+                  if (!v) trackEvent('sources_panel_opened', { city: citySlug });
+                  return !v;
+                });
+              }}
               style={{
                 width: '100%',
                 display: 'flex',
